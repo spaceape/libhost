@@ -5,7 +5,7 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-set(MMI_SRC_DIR ${HOST_SRC_DIR}/${NAME})
+set(MMI_SDK_DIR ${HOST_SDK_DIR}/${NAME})
 
 set(inc
   metrics.h policy.h resource.h
@@ -19,11 +19,11 @@ set(inc
 add_subdirectory(manager)
 
 if(SDK)
-  file(MAKE_DIRECTORY ${MMI_SRC_DIR})
+  file(MAKE_DIRECTORY ${MMI_SDK_DIR})
   install(
     FILES
       ${inc}
     DESTINATION
-      ${MMI_SRC_DIR}
+      ${MMI_SDK_DIR}
   )
 endif(SDK)

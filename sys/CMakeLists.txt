@@ -5,18 +5,18 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-set(SYS_SRC_DIR ${HOST_SRC_DIR}/${NAME})
+set(SYS_SDK_DIR ${HOST_SDK_DIR}/${NAME})
 
 set(inc
   var.h fmt.h descriptor.h ios.h asio.h
 )
 
 if(SDK)
-  file(MAKE_DIRECTORY ${SYS_SRC_DIR})
+  file(MAKE_DIRECTORY ${SYS_SDK_DIR})
   install(
     FILES
       ${inc}
     DESTINATION
-      ${SYS_SRC_DIR}
+      ${SYS_SDK_DIR}
   )
 endif(SDK)

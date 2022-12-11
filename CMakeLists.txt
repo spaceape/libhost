@@ -15,8 +15,8 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set(HOST_SRC_DIR ${GLOBL_SRC_DIR}/${NAME})
-set(HOST_CFG_DIR ${GLOBL_CFG_DIR})
+set(HOST_SDK_DIR ${HOST_SDK_DIR}/${NAME})
+set(HOST_CFG_DIR ${HOST_CFG_DIR})
 
 set(inc
   global.h export.h error.h traits.h log.h dbg.h none.h dpu.h fpu.h gpu.h hash.h compare.h convert.h char.h tmp.h
@@ -47,12 +47,12 @@ set_target_properties(${NAME} PROPERTIES PREFIX "${PREFIX}")
 target_link_libraries(${NAME} ${libs})
 
 if(SDK)
-  file(MAKE_DIRECTORY ${HOST_SRC_DIR})
+  file(MAKE_DIRECTORY ${HOST_SDK_DIR})
   install(
     FILES
       ${inc}
     DESTINATION
-      ${HOST_SRC_DIR}
+      ${HOST_SDK_DIR}
   )
 endif(SDK)
 
@@ -60,5 +60,5 @@ install(
   TARGETS
     ${NAME}
   DESTINATION
-    ${GLOBL_LIB_DIR}
+    ${HOST_LIB_DIR}
 )

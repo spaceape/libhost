@@ -5,18 +5,18 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-set(IOS_SRC_DIR ${SYS_SRC_DIR}/${NAME})
+set(IOS_SDK_DIR ${SYS_SDK_DIR}/${NAME})
 
 set(inc
   rio.h sio.h fio.h tty.h net.h bio.h pio.h
 )
 
 if(SDK)
-  file(MAKE_DIRECTORY ${SYS_SRC_DIR})
+  file(MAKE_DIRECTORY ${SYS_SDK_DIR})
   install(
     FILES
       ${inc}
     DESTINATION
-      ${IOS_SRC_DIR}
+      ${IOS_SDK_DIR}
   )
 endif(SDK)
