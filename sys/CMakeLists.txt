@@ -8,7 +8,7 @@ include_directories(
 set(SYS_SDK_DIR ${HOST_SDK_DIR}/${NAME})
 
 set(inc
-  var.h fmt.h descriptor.h ios.h asio.h
+  arg.h argv.h var.h fmt.h descriptor.h ios.h asio.h
 )
 
 if(SDK)

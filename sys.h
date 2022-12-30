@@ -46,6 +46,9 @@ class pio;
 
 namespace sys {
 
+class arg;
+class argv;
+
 class ios;
 
 template<typename Bt = bio, typename Xt = fio>

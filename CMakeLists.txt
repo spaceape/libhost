@@ -26,7 +26,7 @@ set(inc
 set(srcs
   error.cpp log.cpp dbg.cpp dpu/${DPU}.cpp fpu/${FPU}.cpp gpu/${GPU}.cpp
   mmi/mmi.cpp
-  sys/asio.cpp sys/ios/rio.cpp sys/ios/sio.cpp sys/ios/fio.cpp sys/ios/tty.cpp sys/ios/net.cpp sys/ios/bio.cpp sys/ios/pio.cpp
+  sys/arg.cpp sys/argv.cpp sys/asio.cpp sys/ios/rio.cpp sys/ios/sio.cpp sys/ios/fio.cpp sys/ios/tty.cpp sys/ios/net.cpp sys/ios/bio.cpp sys/ios/pio.cpp
   sys/var.cpp sys/descriptor.cpp sys/ios.cpp sys/sys.cpp
   tmp.cpp
 )
