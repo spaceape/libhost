@@ -53,7 +53,7 @@ class argv
 
   private:
           bool         arg_reserve(int, int) noexcept;
-          int          arg_extract_next(char*&, char*&) noexcept;
+          int          arg_extract_next(char*&, char*&, bool&) noexcept;
 
   public:
           argv() noexcept;

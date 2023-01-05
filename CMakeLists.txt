@@ -32,7 +32,7 @@ set(srcs
 )
 
 set(libs
-  m dl rt pthread
+  m dl rt pthread crypto
 )
 
 add_subdirectory(dpu)
@@ -41,6 +41,7 @@ add_subdirectory(gpu)
 add_subdirectory(mmi)
 add_subdirectory(pxi)
 add_subdirectory(sys)
+add_subdirectory(hash)
 
 add_library(${NAME} STATIC ${srcs})
 set_target_properties(${NAME} PROPERTIES PREFIX "${PREFIX}")

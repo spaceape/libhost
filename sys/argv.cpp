@@ -116,35 +116,39 @@ bool  argv::arg_reserve(int count, int keep) noexcept
       return true;
 }
 
-int   argv::arg_extract_next(char*& arg_str, char*& arg_iter) noexcept
+int   argv::arg_extract_next(char*& arg_str, char*& arg_iter, bool& has_next) noexcept
 {
-      int  l_end_min = 0;
-      int  l_end_max = SPC;
+      int  l_stop_char  = SPC;
 
       // handle "" and '' arguments
       if(arg_str[0] == '"') {
-          l_end_min = '"';
-          l_end_max = '"';
+          l_stop_char = '"';
           arg_iter[0] = 0;
           ++arg_iter;
           ++arg_str;
       } else
       if(arg_str[0] == '\'') {
-          l_end_min = '\'';
-          l_end_max = '\'';
+          l_stop_char = '\'';
           arg_iter[0] = 0;
           ++arg_iter;
           ++arg_str;
       }
-      // parse the argument presumably starting at `arg_iter`: iterate until the first character within the range
-      // `l_end_min`..`l_end_max` is encountered.
-      while(*arg_iter <= ASCII_MAX) {
-          if((*arg_iter >= l_end_min) &&
-              (*arg_iter <= l_end_max)) {
-              *arg_iter = 0;
-              return arg_iter - arg_str;
-          }
-          arg_iter++;
+
+      // parse the argument presumably starting at `arg_iter`
+      // has_next = false;
+      bool l_stop_found = l_stop_char == SPC;
+      bool l_next_found = false;
+      while(*arg_iter != NUL) {
+          if(*arg_iter == l_stop_char) {
+              l_next_found = true;
+              l_stop_found = true;
+              *arg_iter = NUL;
+          } else
+              arg_iter++;
+      }
+      has_next = l_next_found;
+      if(l_stop_found) {
+          return arg_iter - arg_str;
       }
       return -1;
 }
@@ -203,40 +207,43 @@ int   argv::load(char* str, int) noexcept
       char* l_str_iter  = str;
       int   l_arg_index = 0;
       while(*l_str_iter) {
+          bool l_has_next = false;
           if((*l_str_iter >= SPC) &&
               (*l_str_iter <= ASCII_MAX)) {
               char* l_arg_base = l_str_iter;
-              int   l_arg_length = arg_extract_next(l_arg_base, l_str_iter);
+              int   l_arg_length = arg_extract_next(l_arg_base, l_str_iter, l_has_next);
               if(l_arg_length >= 0) {
-                  if(l_arg_index < arg_near_reserve) {
-                      m_arg_near[l_arg_index] = arg(l_arg_base, l_arg_length);
-                  } else
-                  if(l_arg_index < arg_count_max) {
-                      int  l_far_index   = l_arg_index - arg_near_reserve;
-                      bool l_far_success = arg_reserve(l_arg_index + 1, l_arg_index);
-                      if(l_far_success) {
-                          m_arg_far[l_far_index] = arg(l_arg_base, l_arg_length);
+                  if(l_arg_length > 0) {
+                      if(l_arg_index < arg_near_reserve) {
+                          m_arg_near[l_arg_index] = arg(l_arg_base, l_arg_length);
+                      } else
+                      if(l_arg_index < arg_count_max) {
+                          int  l_far_index   = l_arg_index - arg_near_reserve;
+                          bool l_far_success = arg_reserve(l_arg_index + 1, l_arg_index);
+                          if(l_far_success) {
+                              m_arg_far[l_far_index] = arg(l_arg_base, l_arg_length);
+                          }
+                          else {
+                              printdbg(
+                                  "Failed to resize argument list.\n",
+                                  __FILE__,
+                                  __LINE__
+                              );
+                              l_arg_index = 0;
+                              break;
+                          }
                       }
                       else {
                           printdbg(
-                              "Failed to resize argument list.\n",
+                              "Too many argument list entries.\n",
                               __FILE__,
                               __LINE__
                           );
                           l_arg_index = 0;
                           break;
                       }
+                      l_arg_index++;
                   }
-                  else {
-                      printdbg(
-                          "Too many argument list entries.\n",
-                          __FILE__,
-                          __LINE__
-                      );
-                      l_arg_index = 0;
-                      break;
-                  }
-                  l_arg_index++;
               }
               else {
                   printdbg(
@@ -251,7 +258,9 @@ int   argv::load(char* str, int) noexcept
                   break;
               }
           }
-          l_str_iter++;
+          if(l_has_next) {
+              l_str_iter++;
+          }
       }
       m_arg_count = l_arg_index;
       return m_arg_count;
