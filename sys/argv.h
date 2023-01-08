@@ -41,13 +41,12 @@ class argv
   */ 
   static constexpr int   arg_count_max = 1024;
 
-  public:
-  static constexpr char  arg_split_space[] = " \t\r\n";
-
   private:
   arg       m_arg_none;
   arg       m_arg_near[arg_near_reserve];   // statically allocated list for args with index [0..arg_near_reserve]
   arg*      m_arg_far;                      // dynamically allocated list for args with index [arg_far_reserve...]
+  short int m_arg_lb;
+  short int m_arg_ub;
   short int m_arg_count;
   short int m_far_reserve;                  // how many args are available onto the 'far' argument list
 
@@ -61,7 +60,7 @@ class argv
           argv(char*, int = arg_count_max) noexcept;
           argv(char**, int) noexcept;
           argv(const argv&) noexcept;
-          argv(argv&) noexcept;
+          argv(argv&&) noexcept;
           ~argv();
 
           void        assign(const argv&) noexcept;
@@ -69,7 +68,10 @@ class argv
           int         load(char*, int = arg_count_max) noexcept;
           int         load(char**, int = arg_count_max) noexcept;
           
+          const arg&  shift() noexcept;
           const arg&  get_arg(int) const noexcept;
+          const arg&  pop() noexcept;
+
           int         get_index_of(const char*) const noexcept;
           int         get_index_of(arg&) const noexcept;
    

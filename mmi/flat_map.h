@@ -256,6 +256,22 @@ class flat_map: public flat_map_traits<Kt, Xt>::base_type
           }
   }
 
+  /* remove_any()
+   * erase any node where the given value matches, return count
+  */
+  inline  int remove_any(const value_type& value) noexcept {
+          int  l_result = 0;
+          auto i_node = base_type::begin();
+          while(i_node != base_type::end()) {
+              if(i_node->value == value) {
+                  i_node = base_type::erase(i_node);
+                  l_result++;
+              } else
+                  i_node++;
+          }
+          return l_result;
+  }  
+
   /* remove()
   */
   inline  void remove(iterator_type pos) noexcept {

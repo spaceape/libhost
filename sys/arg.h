@@ -31,14 +31,7 @@ namespace sys {
 class arg
 {
   const char* m_text;
-  char*       m_data_far;
   int         m_size;
-
-  public:
-  static  constexpr int  near_size = 44;
-
-  private:
-  char        m_data_near[near_size];
 
   public:
           arg() noexcept;
@@ -48,14 +41,10 @@ class arg
           arg(arg&&) noexcept;
           ~arg();
 
-          bool   has_key(const char*) const noexcept;
-          bool   has_value(const char*) const noexcept;
-
           bool   has_text() const noexcept;
           bool   has_text(const char*) const noexcept;
           bool   has_text(const char*, int, int) const noexcept;
           auto   get_text() const noexcept -> const char*;
-          char*  get_copy() noexcept;
 
           int    get_char(int) const noexcept;
 
@@ -72,10 +61,6 @@ class arg
           bool   operator==(int) const noexcept;
           bool   operator!=(const char*) const noexcept;
           bool   operator!=(int) const noexcept;
-
-  inline         operator char*() noexcept {
-          return get_copy();
-  }
 
   inline         operator const char*() const noexcept {
           return get_text();

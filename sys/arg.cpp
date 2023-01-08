@@ -29,21 +29,18 @@ namespace sys {
 
       arg::arg() noexcept:
       m_text(nullptr),
-      m_data_far(nullptr),
       m_size(0)
 {
 }
 
       arg::arg(const char* text) noexcept:
       m_text(text),
-      m_data_far(nullptr),
       m_size(std::strlen(text) + 1)
 {
 }
 
       arg::arg(const char* text, int size) noexcept:
       m_text(text),
-      m_data_far(nullptr),
       m_size(size)
 {
 }
@@ -53,25 +50,8 @@ namespace sys {
 {
       if(copy.m_text) {
           if(copy.m_size > 1) {
-              if((copy.m_text == copy.m_data_far) &&
-                  (copy.m_size >= near_size)) {
-                  m_data_far = reinterpret_cast<char*>(malloc(copy.m_size));
-                  if(m_data_far) {
-                      m_text = m_data_far;
-                      m_size = copy.m_size;
-                      std::strncpy(m_data_far, copy.m_text, copy.m_size);
-                  }
-              } else
-              if((copy.m_text == copy.m_data_far) ||
-                  (copy.m_text == std::addressof(copy.m_data_near[0]))) {
-                  m_text = std::addressof(m_data_near[0]);
-                  m_size = copy.m_size;
-                  std::strncpy(m_data_near, copy.m_text, copy.m_size);
-              } else
-              if(true) {
-                  m_text = copy.m_text;
-                  m_size = copy.m_size;
-              }
+              m_text = copy.m_text;
+              m_size = copy.m_size;
           }
       }
 }
@@ -81,25 +61,8 @@ namespace sys {
 {
       if(copy.m_text) {
           if(copy.m_size > 1) {
-              if((copy.m_text == copy.m_data_far) &&
-                  (copy.m_size >= near_size)) {
-                  m_data_far = copy.m_data_far;
-                  if(m_data_far) {
-                      m_text = m_data_far;
-                      m_size = copy.m_size;
-                  }
-                  copy.m_data_far = nullptr;
-              } else
-              if((copy.m_text == copy.m_data_far) ||
-                  (copy.m_text == std::addressof(copy.m_data_near[0]))) {
-                  m_text = std::addressof(m_data_near[0]);
-                  m_size = copy.m_size;
-                  std::strncpy(m_data_near, copy.m_text, copy.m_size);
-              } else
-              if(true) {
-                  m_text = copy.m_text;
-                  m_size = copy.m_size;
-              }
+              m_text = copy.m_text;
+              m_size = copy.m_size;
               copy.m_text = nullptr;
               copy.m_size = 0;
           }
@@ -108,9 +71,6 @@ namespace sys {
 
       arg::~arg()
 {
-      if(m_data_far) {
-          free(m_data_far);
-      }
 }
 
 int   arg::get_char(int index) const noexcept
@@ -119,16 +79,6 @@ int   arg::get_char(int index) const noexcept
           return m_text[index];
       } else
           return 0;
-}
-
-bool  arg::has_key(const char* value) const noexcept
-{
-      return false;
-}
-
-bool  arg::has_value(const char* value) const noexcept
-{
-      return false;
 }
 
 bool  arg::has_text() const noexcept
@@ -163,23 +113,6 @@ bool  arg::has_text(const char* text, int offset, int length) const noexcept
 auto  arg::get_text() const noexcept -> const char*
 {
       return m_text;
-}
-
-char* arg::get_copy() noexcept
-{
-      if((m_text != m_data_far) &&
-          (m_text != std::addressof(m_data_near[0]))) {
-          // make a copy of the current text in a writable memory location
-          if(m_size < near_size) {
-              std::strncpy(m_data_near, m_text, m_size);
-              m_text = std::addressof(m_data_near[0]);
-          } else
-          if(m_size > 0) {
-              m_data_far = reinterpret_cast<char*>(malloc(m_size));
-              m_text = m_data_far;
-          }
-      }
-      return const_cast<char*>(m_text);
 }
 
 int   arg::get_bin_int() const noexcept

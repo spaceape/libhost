@@ -30,6 +30,8 @@ namespace sys {
       argv::argv() noexcept:
       m_arg_none(),
       m_arg_far(nullptr),
+      m_arg_lb(0),
+      m_arg_ub(0),
       m_arg_count(0),
       m_far_reserve(0)
 {
@@ -70,10 +72,11 @@ namespace sys {
       assign(copy);
 }
 
-      argv::argv(argv& copy) noexcept:
+      argv::argv(argv&& copy) noexcept:
       argv()
 {
       assign(std::move(copy));
+      copy.release();
 }
 
       argv::~argv()
@@ -157,20 +160,20 @@ void  argv::assign(const argv& copy) noexcept
 {
       if(this != std::addressof(copy)) {
           clear();
-          if(copy.m_arg_count > 0) {
+          if(copy.get_count() > 0) {
               bool l_reserve_success = arg_reserve(copy.m_arg_count, 0);
               if(l_reserve_success) {
                   for(int 
                         i_arg = 0;
-                        (i_arg < copy.m_arg_count) && (i_arg < arg_near_reserve);
+                        (i_arg < copy.get_count()) && (i_arg < arg_near_reserve);
                         i_arg++) {
-                        m_arg_near[i_arg] = copy.m_arg_near[i_arg];
+                        m_arg_near[i_arg] = copy.get_arg(i_arg);
                   }
                   for(int
                         i_arg = arg_near_reserve;
-                        i_arg < copy.m_arg_count;
+                        i_arg < copy.get_count();
                         i_arg++) {
-                        m_arg_far[i_arg - arg_near_reserve] = copy.m_arg_far[i_arg - arg_near_reserve];
+                        m_arg_far[i_arg - arg_near_reserve] = copy.get_arg(i_arg);
                           
                   }
                   m_arg_count = copy.m_arg_count;
@@ -184,7 +187,7 @@ void  argv::assign(argv&& copy) noexcept
       if(this != std::addressof(copy)) {
           dispose();
           clear();
-          if(copy.m_arg_count > 0) {
+          if(copy.get_count() > 0) {
               for(int 
                     i_arg = 0;
                     (i_arg < copy.m_arg_count) && (i_arg < arg_near_reserve);
@@ -192,6 +195,8 @@ void  argv::assign(argv&& copy) noexcept
                     m_arg_near[i_arg] = copy.m_arg_near[i_arg];
               }
               m_arg_far = copy.m_arg_far;
+              m_arg_lb = copy.m_arg_lb;
+              m_arg_ub = copy.m_arg_ub;
               m_arg_count = copy.m_arg_count;
               copy.release();
           }
@@ -263,11 +268,15 @@ int   argv::load(char* str, int) noexcept
           }
       }
       m_arg_count = l_arg_index;
+      m_arg_lb = 0;
+      m_arg_ub = 0;
       return m_arg_count;
 }
 
 int   argv::load(char** argv, int argc) noexcept
 {
+      m_arg_lb = 0;
+      m_arg_ub = 0;
       m_arg_count = 0;
       if((argc > 0) &&
           (argc < arg_count_max)) {
@@ -292,27 +301,55 @@ int   argv::load(char** argv, int argc) noexcept
       return m_arg_count;
  }
 
+const arg& argv::shift() noexcept
+{
+      if(m_arg_lb < m_arg_count - m_arg_ub) {
+          if(m_arg_lb < arg_near_reserve) {
+              return m_arg_near[m_arg_lb++];
+          } else
+              return m_arg_far[m_arg_lb++ - arg_near_reserve];
+      } else
+          return m_arg_none;
+}
+
 const arg& argv::get_arg(int index) const noexcept
 {
       if(index >= 0) {
-          if(index < arg_near_reserve) {
-              return m_arg_near[index];
+          int l_tr_index = index + m_arg_lb;
+          int l_tr_count = m_arg_count - m_arg_lb - m_arg_ub;
+          if(l_tr_index < l_tr_count) {
+              if(l_tr_index < arg_near_reserve) {
+                  return m_arg_near[l_tr_index];
+              }
+              return m_arg_far[l_tr_index - arg_near_reserve];
           }
-          return m_arg_far[index - arg_near_reserve];
       }
       return m_arg_none;
 }
 
+const arg& argv::pop() noexcept
+{
+      int l_arg_index = m_arg_count - m_arg_ub - 1;
+      if(l_arg_index >= m_arg_lb) {
+          --m_arg_ub;
+          if(l_arg_index < arg_near_reserve) {
+              return m_arg_near[l_arg_index];
+          } else
+              return m_arg_far[l_arg_index - arg_near_reserve];
+      } else
+          return m_arg_none;
+}
+
 int   argv::get_index_of(const char* text) const noexcept
 {
-      if((text != nullptr) &&
-          (text[0] != 0)) {
-          for(int i_arg = 0; i_arg < m_arg_count; i_arg++) {
-              const arg& r_arg = get_arg(i_arg);
-              if(r_arg.has_text(text)) {
-                  return i_arg;
+      if((text != nullptr) && (text[0] != 0)) {
+          int l_arg_index = 0;
+          int l_arg_count = get_count();
+          while(l_arg_index < l_arg_count) {
+              if(const arg& l_arg = get_arg(l_arg_index); l_arg.has_text(text)) {
+                  return l_arg_index;
               }
-              i_arg++;
+              ++l_arg_index;
           }
       }
       return -1;
@@ -320,13 +357,13 @@ int   argv::get_index_of(const char* text) const noexcept
 
 int   argv::get_index_of(arg& inst) const noexcept
 {
-      int i_arg = 0;
-      while(i_arg < m_arg_count) {
-          const arg& l_arg = get_arg(i_arg);
-          if(std::addressof(inst) == std::addressof(l_arg)) {
-              return i_arg;
+      int l_arg_index = 0;
+      int l_arg_count = get_count();
+      while(l_arg_index < l_arg_count) {
+          if(const arg& l_arg = get_arg(l_arg_index); std::addressof(l_arg) == std::addressof(inst)) {
+              return l_arg_index;
           }
-          i_arg++;
+          ++l_arg_index;
       }
       return -1;
 }
@@ -362,18 +399,18 @@ const arg& argv::get_arg_relative(const char* base, int offset) const noexcept
 */
 auto  argv::get_exec_ptr(char** arg_ptr, int arg_count) const noexcept -> char* const*
 {
-      if(arg_count > m_arg_count) {
-          int i_arg = 0;
-          while(i_arg < m_arg_count) {
+      int l_arg_index = 0;
+      int l_arg_count = get_count();
+      while(l_arg_index < arg_count) {
+          if(l_arg_index < l_arg_count) {
               // NOTE: the `const_cast` is absolutely **not** how to handle this, but suspect `execv` has the wrong signature
               // and doesn't actually modify the contents of the strings
-              arg_ptr[i_arg] = const_cast<char*>(get_arg(i_arg).get_text());
-              i_arg++;
-          }
-          arg_ptr[i_arg] = nullptr;
-          return arg_ptr;
+              arg_ptr[l_arg_index] = const_cast<char*>(get_arg(l_arg_index).get_text());
+          } else
+              arg_ptr[l_arg_index] = nullptr;
+          ++l_arg_index;
       }
-      return nullptr;
+      return arg_ptr;
 }
 
 bool  argv::has_count(int count) const noexcept
@@ -383,21 +420,21 @@ bool  argv::has_count(int count) const noexcept
 
 int   argv::get_count() const noexcept
 {
-      return m_arg_count;
+      return m_arg_count - m_arg_lb - m_arg_ub;
 }
 
 void  argv::clear() noexcept
 {
       m_arg_count = 0;
+      m_arg_lb = 0;
+      m_arg_ub = 0;
 }
 
 void  argv::release() noexcept
 {
       m_arg_far = nullptr;
       m_far_reserve = 0;
-      if(m_arg_count > arg_near_reserve) {
-          m_arg_count = arg_near_reserve;
-      }
+      m_arg_count = 0;
 }
 
 void  argv::dispose(bool reset) noexcept
@@ -430,6 +467,7 @@ argv&  argv::operator=(const argv& rhs) noexcept
 argv&  argv::operator=(argv&& rhs) noexcept
 {
       assign(std::move(rhs));
+      rhs.release();
       return *this;
 }
 
