@@ -38,7 +38,7 @@ constexpr bool  is_lsb = true;
 constexpr bool  is_msb =(is_lsb == false);
 
 constexpr bool  is_linux = LINUX;
-constexpr bool  is_unix  = is_linux;
+constexpr bool  is_unix  = is_linux || UNIX;
 
 constexpr int   memory_page_size = 4096;
 constexpr int   filesystem_block_size = 1024;

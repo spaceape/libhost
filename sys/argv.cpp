@@ -87,7 +87,7 @@ namespace sys {
 bool  argv::arg_reserve(int count, int keep) noexcept
 {
       int l_far_count = count - arg_near_reserve;   // how many 'far' instances to reserve memory for
-      int l_far_move  = keep;                       // how many instances to preserve into the new array
+      int l_far_move  = keep;                       // how many of the existing args to preserve into the new array
       if(l_far_count > m_far_reserve) {
           int   l_far_reserve = get_round_value(l_far_count, global::cache_small_max);
           arg*  l_far_ptr     = reinterpret_cast<arg*>(malloc(l_far_reserve * sizeof(arg)));
@@ -95,6 +95,7 @@ bool  argv::arg_reserve(int count, int keep) noexcept
               int i_far_arg = 0;
               // initialise newly allocated arg vector: move existing arg instances to the new vector
               // and destruct the old ones
+              // TODO: don't recreate arg instances on positions lower than `m_arg_lb`
               if(m_arg_far != nullptr) {
                   while(i_far_arg < l_far_move - arg_near_reserve) {
                       new(l_far_ptr + i_far_arg) arg(std::move(m_arg_far[i_far_arg]));
@@ -299,7 +300,43 @@ int   argv::load(char** argv, int argc) noexcept
           }
       }
       return m_arg_count;
- }
+}
+
+const arg& argv::push(const char* p) noexcept
+{
+      if(p) {
+          if(p[0]) {
+              int  l_arg_index = m_arg_count - m_arg_ub;
+              int  l_far_index = l_arg_index - arg_near_reserve;
+              arg* l_arg_ptr = nullptr;
+              if(l_arg_index < m_arg_count) {
+                  if(l_arg_index < arg_near_reserve) {
+                      l_arg_ptr = std::addressof(m_arg_near[l_arg_index]);
+                  } else
+                      l_arg_ptr = std::addressof(m_arg_far[l_arg_index - arg_near_reserve]);
+                  m_arg_ub--;
+              } else
+              if(l_arg_index < arg_near_reserve) {
+                  l_arg_ptr = std::addressof(m_arg_near[l_arg_index]);
+                  m_arg_count++;
+              } else
+              if(l_far_index >= 0) {
+                  if(l_far_index >= m_far_reserve) {
+                      if(bool
+                          l_reserve_success = arg_reserve(m_arg_count + global::cache_small_max, m_arg_count);
+                          l_reserve_success == false) {
+                          return m_arg_none;
+                      }
+                  }
+                  l_arg_ptr = std::addressof(m_arg_far[l_far_index]);
+                  m_arg_count++;
+              }
+              l_arg_ptr->set(p);
+              return *l_arg_ptr;
+          }
+      }
+      return m_arg_none;
+}
 
 const arg& argv::shift() noexcept
 {
@@ -317,7 +354,7 @@ const arg& argv::get_arg(int index) const noexcept
       if(index >= 0) {
           int l_tr_index = index + m_arg_lb;
           int l_tr_count = m_arg_count - m_arg_lb - m_arg_ub;
-          if(l_tr_index < l_tr_count) {
+          if(index < l_tr_count) {
               if(l_tr_index < arg_near_reserve) {
                   return m_arg_near[l_tr_index];
               }
@@ -421,6 +458,11 @@ bool  argv::has_count(int count) const noexcept
 int   argv::get_count() const noexcept
 {
       return m_arg_count - m_arg_lb - m_arg_ub;
+}
+
+bool  argv::reserve(int count) noexcept
+{
+      return arg_reserve(count, m_arg_count - m_arg_ub);
 }
 
 void  argv::clear() noexcept

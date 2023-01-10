@@ -23,6 +23,7 @@
 **/
 #include <sys.h>
 #include "arg.h"
+#include <functional>
 
 namespace sys {
 
@@ -59,6 +60,17 @@ class argv
           argv(std::initializer_list<const char*>) noexcept;
           argv(char*, int = arg_count_max) noexcept;
           argv(char**, int) noexcept;
+
+  template<typename It>
+  inline  argv(It b, It e) noexcept {
+          load(b, e);
+  }
+
+  template<typename It, typename Pt>
+  inline  argv(It b, It e, const Pt& p) noexcept {
+          load(b, e, p);
+  }
+
           argv(const argv&) noexcept;
           argv(argv&&) noexcept;
           ~argv();
@@ -67,7 +79,60 @@ class argv
           void        assign(argv&&) noexcept;
           int         load(char*, int = arg_count_max) noexcept;
           int         load(char**, int = arg_count_max) noexcept;
-          
+
+  template<typename It>
+  inline  int         load(It b, It e) noexcept {
+          m_arg_lb = 0;
+          m_arg_ub = 0;
+          m_arg_count = 0;
+          if(int 
+              l_arg_count = std::distance(b, e);
+              (l_arg_count > 0) &&
+              (l_arg_count < arg_count_max)) {
+              if(bool
+                  l_reserve_success = arg_reserve(l_arg_count, 0);
+                  l_reserve_success == true) {
+                  int l_arg_index = 0;
+                  for(auto i = b; i != e; i++) {
+                      if(l_arg_index < arg_near_reserve) {
+                          m_arg_near[l_arg_index].set(*i);
+                      } else
+                          m_arg_far[l_arg_index - arg_near_reserve].set(*i);
+                      l_arg_index++;
+                  }
+                  m_arg_count = l_arg_count;
+              }
+          }
+          return m_arg_count;
+  }
+
+  template<typename It, typename Pt>
+  inline  int         load(It b, It e, const Pt& p) noexcept {
+          m_arg_lb = 0;
+          m_arg_ub = 0;
+          m_arg_count = 0;
+          if(int 
+              l_arg_count = std::distance(b, e);
+              (l_arg_count > 0) &&
+              (l_arg_count < arg_count_max)) {
+              if(bool
+                  l_reserve_success = arg_reserve(l_arg_count, 0);
+                  l_reserve_success == true) {
+                  int l_arg_index = 0;
+                  for(auto i = b; i != e; i++) {
+                      if(l_arg_index < arg_near_reserve) {
+                          m_arg_near[l_arg_index].set(p(i));
+                      } else
+                          m_arg_far[l_arg_index - arg_near_reserve].set(p(i));
+                      l_arg_index++;
+                  }
+                  m_arg_count = l_arg_count;
+              }
+          }
+          return m_arg_count;
+  }
+
+          const arg&  push(const char*) noexcept;
           const arg&  shift() noexcept;
           const arg&  get_arg(int) const noexcept;
           const arg&  pop() noexcept;
@@ -84,6 +149,7 @@ class argv
           bool        has_count(int) const noexcept;
           int         get_count() const noexcept;
 
+          bool        reserve(int) noexcept;
           void        clear() noexcept;
           void        release() noexcept;
           void        dispose(bool = true) noexcept;

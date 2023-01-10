@@ -115,6 +115,12 @@ auto  arg::get_text() const noexcept -> const char*
       return m_text;
 }
 
+auto  arg::get_text(int offset) const noexcept -> const char*
+{
+      return m_text + offset;
+}
+
+
 int   arg::get_bin_int() const noexcept
 {
       int l_result = 0;
@@ -141,6 +147,30 @@ int   arg::get_int() const noexcept
       int l_result = 0;
       convert<char*>::get_int_value(l_result, m_text, m_size, true);
       return l_result;
+}
+
+void  arg::set(char* text) noexcept
+{
+      m_text = text;
+      m_size = std::strlen(text);
+}
+
+void  arg::set(char* text, int size) noexcept
+{
+      m_text = text;
+      m_size = size;
+}
+
+void  arg::set(const char* text) noexcept
+{
+      m_text = text;
+      m_size = std::strlen(text);
+}
+
+void  arg::set(const char* text, int size) noexcept
+{
+      m_text = text;
+      m_size = size;
 }
 
 bool  arg::has_size(int size) const noexcept
@@ -170,7 +200,7 @@ bool  arg::operator!=(const char* text) const noexcept
 
 arg&  arg::operator=(char* rhs) noexcept
 {
-      m_text = rhs;
+      set(rhs);
       return *this;
 }
 

@@ -45,6 +45,7 @@ class arg
           bool   has_text(const char*) const noexcept;
           bool   has_text(const char*, int, int) const noexcept;
           auto   get_text() const noexcept -> const char*;
+          auto   get_text(int) const noexcept -> const char*;
 
           int    get_char(int) const noexcept;
 
@@ -52,6 +53,11 @@ class arg
           int    get_dec_int() const noexcept;
           int    get_hex_int() const noexcept;
           int    get_int() const noexcept;
+
+          void   set(char*) noexcept;
+          void   set(char*, int) noexcept;
+          void   set(const char*) noexcept;
+          void   set(const char*, int) noexcept;
 
           bool   has_size(int) const noexcept;
           int    get_size() const noexcept;
