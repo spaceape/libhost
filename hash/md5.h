@@ -39,7 +39,8 @@ class md5
   public:
   inline  md5() noexcept {
           // initialize with a dummy (but probably unique) value
-          md5_digest l_digest(this); l_digest.copy(m_value);
+          md5_digest l_digest(this);
+          l_digest.copy(m_value);
   }
 
   inline  md5(const std::uint8_t* bytes) noexcept {
@@ -63,6 +64,45 @@ class md5
 
   inline  auto  get_value() const noexcept -> const std::uint8_t* {
           return m_value;
+  }
+
+  inline  auto  get_c_string(char* data, int size) const noexcept -> const char* {
+          if(size >= hash_size * 2) {
+              char* i_data = data;
+              int   i_hash = 0;
+              int   l_byte;
+              int   l_nibble;
+              // this is probably generated backwards :)
+              while(i_hash < hash_size) {
+                  l_byte = m_value[i_hash];
+                  while(l_byte > 0) {
+                      l_nibble = l_byte & 15;
+                      if(l_nibble < 10) {
+                          *i_data = '0' + l_nibble;
+                      } else
+                          *i_data = 'a' + l_nibble - 10;
+                      ++i_data;
+                      l_byte /= 16;
+                  }
+                  ++i_hash;
+              }
+              if(size > hash_size * 2) {
+                  *i_data = 0;
+              }
+              return data;
+          }
+          return nullptr;
+  }
+  
+  inline  auto  get_std_string() const noexcept -> std::string {
+          std::size_t l_size = hash_size * 2;
+          std::string l_result(l_size, '0');
+          get_c_string(l_result.data(), l_result.size());
+          return l_result;
+  }
+
+  inline  int   get_length() const noexcept {
+          return hash_size;
   }
 
   inline  int   compare(const md5& rhs) const noexcept {
@@ -101,6 +141,11 @@ class md5
           return compare(rhs) != 0;
   }
 
+  inline  md5&  operator=(md5::digest& rhs) noexcept {
+          reset(rhs);
+          return *this;
+  }
+  
   inline  md5&  operator=(const md5& rhs) noexcept {
           if(std::addressof(rhs) != this) {
               std::memcpy(m_value, rhs.m_value, hash_size);
