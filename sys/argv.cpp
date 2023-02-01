@@ -349,6 +349,14 @@ const arg& argv::shift() noexcept
           return m_arg_none;
 }
 
+void  argv::shift(int count) noexcept
+{
+      while(count > 0) {
+          shift();
+          count--;
+      }
+}
+
 const arg& argv::get_arg(int index) const noexcept
 {
       if(index >= 0) {
@@ -362,6 +370,14 @@ const arg& argv::get_arg(int index) const noexcept
           }
       }
       return m_arg_none;
+}
+
+void  argv::pop(int count) noexcept
+{
+      while(count > 0) {
+          pop();
+          count--;
+      }
 }
 
 const arg& argv::pop() noexcept
@@ -500,13 +516,19 @@ const arg&  argv::operator[](int index) const noexcept
       return get_arg(index);
 }
 
-argv&  argv::operator=(const argv& rhs) noexcept
+argv& argv::operator=(char* str) noexcept
+{
+      load(str);
+      return *this;
+}
+
+argv& argv::operator=(const argv& rhs) noexcept
 {
       assign(rhs);
       return *this;
 }
 
-argv&  argv::operator=(argv&& rhs) noexcept
+argv& argv::operator=(argv&& rhs) noexcept
 {
       assign(std::move(rhs));
       rhs.release();

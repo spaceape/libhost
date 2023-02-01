@@ -120,6 +120,10 @@ auto  arg::get_text(int offset) const noexcept -> const char*
       return m_text + offset;
 }
 
+auto  arg::get_std_string() const noexcept -> std::string
+{
+      return std::string(m_text, m_size);
+}
 
 int   arg::get_bin_int() const noexcept
 {

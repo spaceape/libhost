@@ -23,6 +23,7 @@
 **/
 #include "global.h"
 #include "md5_digest.h"
+#include <cstring>
 
 /* md5
    md5 hash
@@ -38,13 +39,19 @@ class md5
 
   public:
   inline  md5() noexcept {
-          // initialize with a dummy (but probably unique) value
-          md5_digest l_digest(this);
-          l_digest.copy(m_value);
+          std::memset(m_value, 0, hash_size);
   }
 
   inline  md5(const std::uint8_t* bytes) noexcept {
           std::memcpy(m_value, bytes, hash_size);
+  }
+
+  inline  md5(const char* hash, int size) noexcept {
+          set(hash, size);
+  }
+
+  inline  md5(const std::string& hash) noexcept {
+          set(hash);
   }
 
   inline  md5(md5::digest& hash) noexcept {
@@ -67,33 +74,73 @@ class md5
   }
 
   inline  auto  get_c_string(char* data, int size) const noexcept -> const char* {
-          if(size >= hash_size * 2) {
-              char* i_data = data;
-              int   i_hash = 0;
-              int   l_byte;
-              int   l_nibble;
-              // this is probably generated backwards :)
-              while(i_hash < hash_size) {
-                  l_byte = m_value[i_hash];
-                  while(l_byte > 0) {
-                      l_nibble = l_byte & 15;
-                      if(l_nibble < 10) {
-                          *i_data = '0' + l_nibble;
-                      } else
-                          *i_data = 'a' + l_nibble - 10;
-                      ++i_data;
-                      l_byte /= 16;
+          if(data) {
+              if(size >= hash_size * 2) {
+                  char* i_data = data;
+                  int   i_hash = 0;
+                  int   l_byte;
+                  int   l_nibble;
+                  // this is probably generated backwards :)
+                  while(i_hash < hash_size) {
+                      l_byte = m_value[i_hash];
+                      while(l_byte > 0) {
+                          l_nibble = l_byte & 15;
+                          if(l_nibble < 10) {
+                              *i_data = '0' + l_nibble;
+                          } else
+                              *i_data = 'a' + l_nibble - 10;
+                          ++i_data;
+                          l_byte /= 16;
+                      }
+                      ++i_hash;
                   }
-                  ++i_hash;
+                  if(size > hash_size * 2) {
+                      *i_data = 0;
+                  }
+                  return data;
               }
-              if(size > hash_size * 2) {
-                  *i_data = 0;
-              }
-              return data;
           }
           return nullptr;
   }
   
+  inline  bool  set(const char* hash, int size) noexcept {
+          if(hash) {
+              if(size >= hash_size * 2) {
+                  auto  i_data = hash;
+                  int   i_hash = 0;
+                  int   i_nibble;
+                  int   l_byte;
+                  while(i_hash < hash_size) {
+                      i_nibble = 0;
+                      l_byte = 0;
+                      while(i_nibble < 2) {
+                          l_byte *= 16;
+                          if((*i_data >= '0') &&
+                              (*i_data <= '9')) {
+                              l_byte |= *i_data - '0';
+                          } else
+                          if((*i_data >= 'A') &&
+                              (*i_data <= 'F')) {
+                              l_byte |= 10 + *i_data - 'A';
+                          } else
+                          if((*i_data >= 'a') &&
+                              (*i_data <= 'f')) {
+                              l_byte |= 10 + *i_data - 'a';
+                          } else {
+                              reset();
+                              return false;
+                          }
+                          ++i_data;
+                          ++i_nibble;
+                      }
+                      m_value[i_hash++] = l_byte;
+                  }
+                  return true;
+              }
+          }
+          return false;
+  }
+
   inline  auto  get_std_string() const noexcept -> std::string {
           std::size_t l_size = hash_size * 2;
           std::string l_result(l_size, '0');
@@ -101,20 +148,37 @@ class md5
           return l_result;
   }
 
+  inline  bool  set(const std::string& hash) noexcept {
+          return set(hash.c_str(), hash.size());
+  }
+
   inline  int   get_length() const noexcept {
           return hash_size;
+  }
+
+  inline   bool get_zero() const noexcept {
+          for(int i_hash = 0; i_hash != hash_size; i_hash++) {
+              if(m_value[i_hash] != 0) {
+                  return false;
+              }
+          }
+          return true;
   }
 
   inline  int   compare(const md5& rhs) const noexcept {
           return std::memcmp(m_value, rhs.m_value, hash_size);
   }
 
+  inline  void  reset() noexcept {
+          std::memset(m_value, 0, hash_size);
+  }
+
   inline  void  reset(md5::digest& hash) noexcept {
           hash.copy(m_value);
   }
 
-  inline  operator const std::uint8_t*() const noexcept {
-          return get_value();
+  inline  operator bool() const noexcept {
+          return get_zero() == false;
   }
 
   inline  bool  operator<(const md5& rhs) const noexcept {
@@ -139,6 +203,14 @@ class md5
 
   inline  bool  operator!=(const md5& rhs) const noexcept {
           return compare(rhs) != 0;
+  }
+
+  inline  bool  operator==(nullptr_t) const noexcept {
+          return get_zero() == true;
+  }
+
+  inline  bool  operator!=(nullptr_t) const noexcept {
+          return get_zero() == false;
   }
 
   inline  md5&  operator=(md5::digest& rhs) noexcept {

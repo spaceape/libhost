@@ -22,6 +22,7 @@
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include "global.h"
+#include <cstring>
 #include <openssl/md5.h>
 
 class md5_digest
@@ -48,12 +49,20 @@ class md5_digest
   inline  void  hash() noexcept {
   }
 
-  inline  void  hash(const char* bytes, std::size_t length) noexcept {
+  inline  void  hash(const char* bytes, int length) noexcept {
+          MD5_Update(std::addressof(m_ctx), bytes, length);
+  }
+
+  inline  void  hash(const std::uint8_t* bytes, int length) noexcept {
           MD5_Update(std::addressof(m_ctx), bytes, length);
   }
 
   inline  void  hash(const char* string) noexcept {
           MD5_Update(std::addressof(m_ctx), string, std::strlen(string));
+  }
+  
+  inline  void  hash(const std::string& string) noexcept {
+          MD5_Update(std::addressof(m_ctx), string.c_str(), string.length());
   }
   
   inline  void  hash(void* object) noexcept {

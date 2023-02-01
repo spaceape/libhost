@@ -134,7 +134,9 @@ class argv
 
           const arg&  push(const char*) noexcept;
           const arg&  shift() noexcept;
+          void        shift(int) noexcept;
           const arg&  get_arg(int) const noexcept;
+          void        pop(int) noexcept;
           const arg&  pop() noexcept;
 
           int         get_index_of(const char*) const noexcept;
@@ -155,6 +157,7 @@ class argv
           void        dispose(bool = true) noexcept;
 
           const arg&  operator[](int) const noexcept;
+          argv&       operator=(char*) noexcept;
           argv&       operator=(const argv&) noexcept;
           argv&       operator=(argv&&) noexcept;
 };

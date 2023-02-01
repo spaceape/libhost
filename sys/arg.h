@@ -46,6 +46,7 @@ class arg
           bool   has_text(const char*, int, int) const noexcept;
           auto   get_text() const noexcept -> const char*;
           auto   get_text(int) const noexcept -> const char*;
+          auto   get_std_string() const noexcept -> std::string;
 
           int    get_char(int) const noexcept;
 
@@ -67,6 +68,10 @@ class arg
           bool   operator==(int) const noexcept;
           bool   operator!=(const char*) const noexcept;
           bool   operator!=(int) const noexcept;
+
+  inline         operator std::string() const noexcept {
+          return get_std_string();
+  }
 
   inline         operator const char*() const noexcept {
           return get_text();
