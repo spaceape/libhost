@@ -23,10 +23,10 @@
 **/
 #include "global.h"
 
-constexpr unsigned int err_okay = 0u;
-constexpr unsigned int err_fail = 255;
-constexpr unsigned int err_intern_base = 256;
-constexpr unsigned int err_extern_base = 512;
+constexpr int err_okay = 0;
+constexpr int err_fail = 255;
+constexpr int err_intern_base = 256;
+constexpr int err_extern_base = 512;
 
 constexpr unsigned int lvl_info = 0u;
 constexpr unsigned int lvl_warning = 0x01000000;
