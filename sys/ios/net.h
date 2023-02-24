@@ -1,3 +1,4 @@
+#ifdef LINUX
 #ifndef sys_net_h
 #define sys_net_h
 /** 
@@ -48,4 +49,5 @@ class net: public fio
           net& operator=(const net&) noexcept = delete;
           net& operator=(net&&) noexcept;
 };
+#endif
 #endif

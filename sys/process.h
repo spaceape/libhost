@@ -1,3 +1,4 @@
+#ifdef  LINUX
 #ifndef sys_process_h
 #define sys_process_h
 /** 
@@ -115,4 +116,5 @@ class process
 };
 
 /*namespace sys*/ }
+#endif
 #endif

@@ -1,3 +1,4 @@
+#ifdef  LINUX
 #ifndef sys_tty_h
 #define sys_tty_h
 /** 
@@ -54,4 +55,5 @@ class tty: public fio
           tty& operator=(const tty&) noexcept;
           tty& operator=(tty&&) noexcept;
 };
+#endif
 #endif

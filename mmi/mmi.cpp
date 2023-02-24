@@ -22,7 +22,9 @@
 #include "mmi.h"
 #include "metrics.h"
 #include "error.h"
+#ifdef LINUX
 #include <sys/mman.h>
+#endif
 #include <limits>
 
 static inline bool is_aligned(std::size_t value, std::size_t align) noexcept
@@ -223,6 +225,7 @@ heap& heap::operator=(heap&& rhs) noexcept
 
 /* map memory manager
 */
+#ifdef LINUX
       map::map() noexcept:
       resource(),
       m_desc(-1),
@@ -366,3 +369,4 @@ map&  map::operator=(map&& rhs) noexcept
       m_flags = rhs.m_flags;
       return *this;
 }
+#endif

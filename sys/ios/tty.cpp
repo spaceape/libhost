@@ -20,6 +20,7 @@
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include "tty.h"
+#ifdef   sys_tty_h
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h> 
@@ -372,3 +373,4 @@ tty&  tty::operator=(tty&& rhs) noexcept
       assign(std::move(rhs));
       return *this;
 }
+#endif

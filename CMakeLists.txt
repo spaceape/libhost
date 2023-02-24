@@ -32,8 +32,13 @@ set(srcs
 )
 
 set(libs
-  m dl rt pthread crypto
+  m
 )
+
+if(NOT "${LINUX}" STREQUAL "")
+  set(libs ${libs} dl rt pthread crypto)
+endif()
+
 
 add_subdirectory(dpu)
 add_subdirectory(fpu)

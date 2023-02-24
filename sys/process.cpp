@@ -20,6 +20,7 @@
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include "process.h"
+#ifdef   sys_process_h
 #include <string.h>
 #include <limits.h>
 #include <unistd.h>
@@ -457,3 +458,4 @@ void  process::sync(float dt) noexcept
 }
 
 /*namespace sys*/ }
+#endif

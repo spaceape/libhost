@@ -1,5 +1,5 @@
-#ifndef core_soft_fpu_h
-#define core_soft_fpu_h
+#ifndef core_fpu_soft_h
+#define core_fpu_soft_h
 /** 
     Copyright (c) 2018, wicked systems
     All rights reserved.
@@ -29,6 +29,9 @@
 #define fpts 4
 
 namespace fpu {
+
+constexpr fptype zero = 0.0;
+constexpr fptype one = 1.0;
 
 inline  void  nop() noexcept
 {
@@ -217,11 +220,11 @@ inline  bool equ(const fptype* r, const fptype* s) noexcept {
 }
 
 inline  bool   equ_0(const fptype* r) noexcept {
-        return equ(r, 0.0);
+        return equ(r, zero);
 }
 
 inline  bool   equ_1(const fptype* r) noexcept {
-        return equ(r, 1.0);
+        return equ(r, one);
 }
 /*namespace fpu*/ }
 #endif

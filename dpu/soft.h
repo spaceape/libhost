@@ -1,5 +1,5 @@
-#ifndef core_soft_dpu_h
-#define core_soft_dpu_h
+#ifndef core_dpu_soft_h
+#define core_dpu_soft_h
 /** 
     Copyright (c) 2018, wicked systems
     All rights reserved.
@@ -29,6 +29,10 @@
 #define dpts 4
 
 namespace dpu {
+
+
+constexpr dptype zero = 0;
+constexpr dptype one = 1;
 
 inline  void  nop() noexcept
 {
@@ -222,12 +226,12 @@ inline  bool equ(const dptype* r, const dptype* s) noexcept
 
 inline  bool   equ_0(const dptype* r) noexcept
 {
-        return equ(r, 0);
+        return equ(r, zero);
 }
 
 inline  bool   equ_1(const dptype* r) noexcept
 {
-        return equ(r, 1);
+        return equ(r, one);
 }
 /*namespace dpu*/ }
 #endif

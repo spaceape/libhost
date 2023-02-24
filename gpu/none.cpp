@@ -1,7 +1,5 @@
-#ifndef core_os_h
-#define core_os_h
 /** 
-    Copyright (c) 2019, wicked systems
+    Copyright (c) 2018, wicked systems
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
@@ -21,34 +19,4 @@
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#include "global.h"
-#include <limits>
-
-using     _float = double;                                             /*OS' native floating point type*/
-constexpr _float  _epsilon = std::numeric_limits<_float>::epsilon();   /*epsilon for the native floating point type*/
-
-namespace os {
-
-constexpr char  cpu_name[] = __name_of(CPU);
-constexpr char  dpu_name[] = __name_of(DPU);
-constexpr char  fpu_name[] = __name_of(FPU);
-constexpr char  gpu_name[] = __name_of(GPU);
-
-constexpr bool  is_lsb = true;
-constexpr bool  is_msb =(is_lsb == false);
-
-#ifdef LINUX
-constexpr bool  is_linux = LINUX;
-constexpr bool  is_unix  = is_linux || UNIX;
-constexpr int   memory_page_size = 4096;
-constexpr int   filesystem_block_size = 1024;
-#else
-constexpr bool  is_linux = false;
-constexpr bool  is_unix  = false;
-constexpr int   memory_page_size = 256;
-constexpr int   filesystem_block_size = 512;
-#endif
-
-
-/*namespace os*/ }
-#endif
+#include "none.h"
