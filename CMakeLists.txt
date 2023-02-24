@@ -26,25 +26,20 @@ set(inc
 set(srcs
   error.cpp log.cpp dbg.cpp dpu/${DPU}.cpp fpu/${FPU}.cpp gpu/${GPU}.cpp
   mmi/mmi.cpp
-  sys/arg.cpp sys/argv.cpp sys/asio.cpp sys/ios/rio.cpp sys/ios/sio.cpp sys/ios/fio.cpp sys/ios/tty.cpp sys/ios/net.cpp sys/ios/bio.cpp sys/ios/pio.cpp
-  sys/var.cpp sys/descriptor.cpp sys/process.cpp sys/ios.cpp sys/sys.cpp
-  tmp.cpp
+  sys/adt/adt.cpp sys/adt/node.cpp sys/adt/device.cpp sys/adt/directory.cpp
+  sys/arg.cpp sys/argv.cpp sys/asio.cpp
+  sys/ios/rio.cpp sys/ios/sio.cpp sys/ios/fio.cpp sys/ios/tty.cpp sys/ios/net.cpp sys/ios/bio.cpp sys/ios/pio.cpp
+  sys/ios.cpp sys/sys.cpp
 )
 
 set(libs
-  m
+  m pico_stdlib
 )
-
-if(NOT "${LINUX}" STREQUAL "")
-  set(libs ${libs} dl rt pthread crypto)
-endif()
-
 
 add_subdirectory(dpu)
 add_subdirectory(fpu)
 add_subdirectory(gpu)
 add_subdirectory(mmi)
-add_subdirectory(pxi)
 add_subdirectory(sys)
 add_subdirectory(hash)
 

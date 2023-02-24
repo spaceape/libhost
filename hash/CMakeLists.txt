@@ -8,7 +8,7 @@ include_directories(
 set(HASH_SDK_DIR ${HOST_SDK_DIR}/${NAME})
 
 set(inc
-  fnv.h md5.h md5_digest.h
+  fnv.h
 )
 
 if(SDK)

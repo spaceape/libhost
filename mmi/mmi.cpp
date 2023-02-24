@@ -22,9 +22,6 @@
 #include "mmi.h"
 #include "metrics.h"
 #include "error.h"
-#ifdef LINUX
-#include <sys/mman.h>
-#endif
 #include <limits>
 
 static inline bool is_aligned(std::size_t value, std::size_t align) noexcept
@@ -52,7 +49,6 @@ namespace mmi {
 
 /* resource
 */
-
 static heap       s_heap;
 static resource*  s_default_resource = resource::set_default(nullptr);
 
@@ -222,151 +218,3 @@ heap& heap::operator=(heap&& rhs) noexcept
       resource::operator=(std::move(rhs));
       return *this;
 }
-
-/* map memory manager
-*/
-#ifdef LINUX
-      map::map() noexcept:
-      resource(),
-      m_desc(-1),
-      m_mode(PROT_READ | PROT_WRITE),
-      m_flags(MAP_PRIVATE | MAP_ANONYMOUS)
-{
-}
-
-      map::map(int desc, int flags, int mode) noexcept:
-      resource(),
-      m_desc(desc),
-      m_mode(PROT_READ | PROT_WRITE | mode),
-      m_flags(flags)
-{
-}
-
-
-      map::map(const map& copy) noexcept:
-      resource(copy),
-      m_desc(copy.m_desc),
-      m_mode(copy.m_mode),
-      m_flags(copy.m_flags)
-{
-}
-
-      map::map(map&& copy) noexcept:
-      resource(std::move(copy)),
-      m_desc(copy.m_desc),
-      m_mode(copy.m_mode),
-      m_flags(copy.m_flags)
-{
-}
-
-      map::~map()
-{
-}
-
-void* map::do_allocate(std::size_t size, std::size_t align) noexcept
-{
-      if(size) {
-          if(is_aligned(alloc_bytes, align)) {
-              std::size_t l_size = get_aligned_value(size, alloc_bytes);
-              void*       l_data = mmap(nullptr, l_size, m_mode, m_flags, m_desc, 0);
-              if(l_data != MAP_FAILED) {
-                  return l_data;
-              } else
-                  return nullptr;
-          } else
-              return nullptr;
-      } else
-          return nullptr;
-}
-
-void  map::do_deallocate(void* p, std::size_t size, std::size_t) noexcept
-{
-      munmap(p, size);
-}
-
-bool  map::do_is_equal(const std::pmr::memory_resource&) const noexcept
-{
-      return true;
-}
-
-void* map::reallocate(void* p, std::size_t size, std::size_t new_size, std::size_t align, mmi::fixed) noexcept
-{
-      std::size_t l_size = get_aligned_value(size, alloc_bytes);
-      if(p) {
-          if(l_size < new_size) {
-              std::size_t l_size_new = get_aligned_value(new_size, alloc_bytes);
-              void*       l_data     = mremap(p, l_size, l_size_new, MREMAP_FIXED);
-              if(l_data != MAP_FAILED) {
-                  return l_data;
-              } else
-                  return nullptr;
-          } else
-              return p;
-      } else
-          return allocate(new_size, align);
-}
-
-void* map::reallocate(void* p, std::size_t size, std::size_t new_size, std::size_t align, mmi::expand_throw)
-{
-      std::size_t l_size = get_aligned_value(size, alloc_bytes);
-      if(p) {
-          if(l_size < new_size) {
-          #ifdef __EXCEPTIONS
-              throw  std::length_error("memory boundaries exceeded");
-          #else
-              return nullptr;
-          #endif
-          } else
-              return p;
-      } else
-          return allocate(new_size, align);
-}
-
-void* map::reallocate(void* p, std::size_t size, std::size_t new_size, std::size_t align, ...) noexcept
-{
-      std::size_t l_size = get_aligned_value(size, alloc_bytes);
-      if(p) {
-          if(l_size < new_size) {
-              std::size_t l_size_new = get_aligned_value(new_size, alloc_bytes);
-              void*       l_data     = mremap(p, l_size, l_size_new, MREMAP_MAYMOVE);
-              if(l_data != MAP_FAILED) {
-                  return l_data;
-              } else
-                  return nullptr;
-          } else
-              return p;
-      } else
-          return allocate(new_size, align);
-}
-
-std::size_t map::get_fixed_size() const noexcept
-{
-      return 0;
-}
-
-bool  map::has_variable_size() const noexcept
-{
-      return true;
-}
-
-std::size_t map::get_alloc_size(std::size_t size) const noexcept
-{
-      return get_round_value(size, alloc_bytes);
-}
-
-map&  map::operator=(const map& rhs) noexcept
-{
-      resource::operator=(rhs);
-      m_mode = rhs.m_mode;
-      m_flags = rhs.m_flags;
-      return *this;
-}
-
-map&  map::operator=(map&& rhs) noexcept
-{
-      resource::operator=(std::move(rhs));
-      m_mode = rhs.m_mode;
-      m_flags = rhs.m_flags;
-      return *this;
-}
-#endif

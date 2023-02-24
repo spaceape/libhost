@@ -1,5 +1,3 @@
-#ifndef core_sys_h
-#define core_sys_h
 /** 
     Copyright (c) 2022, wicked systems
     All rights reserved.
@@ -21,62 +19,58 @@
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#include "global.h"
-#include <mmi.h>
-#include "sys/adt.h"
-#include "sys/ios.h"
+#include <sys.h>
+#include <sys/adt.h>
+#include "device.h"
+#include "directory.h"
+#include <cstring>
+#include <util.h>
 
-constexpr char EOL ='\n';
-constexpr char NUL = 0;
-constexpr char EOS = NUL;
+namespace sys {
 
-#ifndef EOF
-constexpr char EOF = -1;
-#endif
+constexpr char chr_path_root = '/';
+constexpr int  chr_reserve_bytes = 32;
 
-constexpr char RET ='\r';
-constexpr char TAB ='\t';
-constexpr char SPC =' ';
-constexpr char ASCII_MAX = 127;
+static char* s_adt_path_cache;
+static int   s_adt_path_size;
 
-/* O_*
-   file open flags for embedded (fcntl.h approved)
-*/
-#ifndef _FCNTL_H
-constexpr long int O_RDONLY = 0;
-constexpr long int O_WRONLY = 1;
-constexpr long int O_RDWR = 2;
-constexpr long int O_ACCMODE = (O_RDONLY | O_WRONLY | O_RDWR);
+node*   adt_get_entry(const char* path) noexcept
+{
+      return nullptr;
+}
 
-constexpr long int O_CREAT = 64;
-constexpr long int O_EXCL = 128;
-constexpr long int O_TRUNC = 512;
-constexpr long int O_APPEND = 1024;
-constexpr long int O_NONBLOCK = 2048;
+device* adt_get_device(const char* path) noexcept
+{
+      sys::device* l_device = nullptr;
+      if(path != nullptr) {
+          char* l_path_ptr;
+          int   l_path_size = std::strlen(path) + 1;
+          int   l_path_reserve = get_round_value(l_path_size, chr_reserve_bytes);
+          // reserve memory for the path object
+          if(l_path_reserve > s_adt_path_size) {
+              s_adt_path_cache = reinterpret_cast<char*>(realloc(s_adt_path_cache, l_path_reserve));
+              if(s_adt_path_cache == nullptr) {
+                  return nullptr;
+              }
+              s_adt_path_size = l_path_reserve;
+          }
+          l_path_ptr = reinterpret_cast<char*>(std::memcpy(s_adt_path_cache, path, l_path_size));
+          // process header
+          if(l_path_ptr[0] == chr_path_root) {
+              l_path_ptr += 1;
+          }
+          // browse path
+          l_device = g_adt->get_at(l_path_ptr);
+      }
+      return l_device;
+}
 
-constexpr long int B_TEXT = 0x1000;
-constexpr long int O_BINARY = 0x2000;
-constexpr long int O_RAW = O_BINARY;
-#endif
-
-constexpr long int  M_ACQUIRE = 0x00010000; // take ownership of file descriptor (for sys::fio)
-
-/* file seek flags for embedded
-*/
-#ifndef SEEK_SET
-constexpr int SEEK_SET = 0;
-#endif
-#ifndef SEEK_CUR
-constexpr int SEEK_CUR = 1;
-#endif
-#ifndef SEEK_END
-constexpr int SEEK_END = 2;
-#endif 
-
-constexpr unsigned int pin_none = 256;
-
-/* g_adt
-   root of the Abstract Device Tree
-*/
-extern sys::directory* g_adt;
-#endif
+directory* adt_get_directory(const char* path) noexcept
+{
+      sys::device* l_device = adt_get_device(path);
+      if(l_device != nullptr) {
+          return static_cast<directory*>(l_device);
+      }
+      return nullptr;
+}
+/*namespace sys*/ }

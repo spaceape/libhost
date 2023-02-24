@@ -1,5 +1,5 @@
-#ifndef sys_descriptor_h
-#define sys_descriptor_h
+#ifndef sys_node_h
+#define sys_node_h
 /** 
     Copyright (c) 2022, wicked systems
     All rights reserved.
@@ -22,31 +22,51 @@
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include <sys.h>
+#include <sys/adt.h>
+#include <char.h>
 
+/* node
+*/
 namespace sys {
 
-class descriptor
+class node
 {
-  int     m_descriptor;
+  char_ptr<>  m_name;
+  directory*  m_root;
+  node*       m_node_prev;
+  node*       m_node_next;
+
+  protected:
+  device*     m_device_ptr;
+
+  protected:
+          void  enable_device_rc() noexcept;
+          void  disable_device_rc() noexcept;
+  virtual void  adt_attach(directory*) noexcept;
+  virtual void  adt_detach(directory*) noexcept;
+  friend  class directory;
 
   public:
-          descriptor() noexcept;
-          descriptor(int) noexcept;
-          descriptor(const descriptor&) noexcept;
-          descriptor(descriptor&&) noexcept;
-          ~descriptor();
-          void clone(int) noexcept;
-          void reset() noexcept;
-          void reset(int) noexcept;
-          void release() noexcept;
-          void dispose(bool = true) noexcept;
-          int  get_value() const noexcept;
-          bool get_defined(bool = true) const noexcept;
-          operator int() const noexcept;
-  descriptor&  operator=(int) noexcept;
-  descriptor&  operator=(const descriptor&) noexcept;
-  descriptor&  operator=(descriptor&&) noexcept;
-};
+          node(device* = nullptr) noexcept;
+          node(const char*, directory*, device* = nullptr) noexcept;
+          node(const node&) noexcept;
+          node(node&&) noexcept;
+  virtual ~node();
 
+          bool    has_root() const noexcept;
+          bool    has_root(directory*) const noexcept;
+          bool    has_name(const char*, int = 0) const noexcept;
+          auto    get_name() const noexcept -> const char*;
+          device* get_device() const noexcept;
+          device* get_device_hook() noexcept;
+
+          void    sync(int) noexcept;
+
+          bool    is_attached() const noexcept;
+
+          device* operator->() const noexcept;
+          node&   operator=(const node&) noexcept;
+          node&   operator=(node&&) noexcept;
+};
 /*namespace sys*/ }
 #endif

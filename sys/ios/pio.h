@@ -23,6 +23,7 @@
 **/
 #include <sys.h>
 #include <sys/ios.h>
+#include "sio.h"
 
 /* pio
    unbuffered io with a rudimentary lexer interface

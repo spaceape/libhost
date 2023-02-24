@@ -24,8 +24,6 @@
 #include "global.h"
 #include "none.h"
 #include "mmi/manager/heap.h"
-#include "mmi/manager/map.h"
-#include "mmi/manager/shared.h"
 #include <mmi/resource.h>
 
 namespace mmi {

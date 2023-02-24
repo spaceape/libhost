@@ -23,8 +23,6 @@
 **/
 #include <global.h>
 #include "manager/heap.h"
-#include "manager/map.h"
-#include "manager/shared.h"
 #include <traits.h>
 
 namespace mmi {

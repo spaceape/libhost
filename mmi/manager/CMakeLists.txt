@@ -8,7 +8,7 @@ include_directories(
 set(MANAGER_SDK_DIR ${MMI_SDK_DIR}/${NAME})
 
 set(inc
-  heap.h map.h shared.h
+  heap.h
 )
 
 if(SDK)

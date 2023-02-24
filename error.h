@@ -23,15 +23,31 @@
 **/
 #include "global.h"
 
-constexpr unsigned int err_okay = 0u;
-constexpr unsigned int err_fail = 255;
-constexpr unsigned int err_intern_base = 256;
-constexpr unsigned int err_extern_base = 512;
+constexpr int err_okay = 0;
+constexpr int err_fail = 255;
 
 constexpr unsigned int lvl_info = 0u;
 constexpr unsigned int lvl_warning = 0x01000000;
 constexpr unsigned int lvl_error = 0x02000000;
 constexpr unsigned int lvl_abort = 0x03000000;
 
-std::nullptr_t error(unsigned int, const char*, const char*, int, ...) noexcept;
+template<typename... Args>
+int   show_error_int(int error, const char* message, const char* file, int line, Args&&... args) noexcept
+{
+#ifdef NDEBUG
+      printf("-!- ERROR %d: ", error);
+#else
+      printf("-!- ERROR %d %s:%d: ", error, file, line);
+#endif
+      printf(message, std::forward<Args>(args)...);
+      puts("\n");
+      return error;
+}
+
+template<typename... Args>
+bool  show_error(int error, const char* message, const char* file, int line, Args&&... args) noexcept
+{
+      return show_error_int(error, message, file, line, std::forward<Args>(args)...) != 0;
+}
+
 #endif

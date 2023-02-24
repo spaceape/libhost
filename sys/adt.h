@@ -1,5 +1,7 @@
+#ifndef sys_adt_h
+#define sys_adt_h
 /** 
-    Copyright (c) 2020, wicked systems
+    Copyright (c) 2022, wicked systems
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
@@ -19,21 +21,36 @@
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#include "var.h"
+#include <sys.h>
 
 namespace sys {
 
-const char* get_environment_variable(const char* name) noexcept
-{
-      return getenv(name);
+class  node;
+class  device;
+class  directory;
+
+extern node*      adt_get_node(const char*) noexcept;
+extern device*    adt_get_device(const char*) noexcept;
+inline directory* adt_get_directory(const char*) noexcept;
+
+template<typename Xt>
+inline Xt*   adt_cast(const char* path) noexcept {
+      return static_cast<Xt*>(sys::adt_get_device(path));
 }
 
-const char* set_environment_variable(const char* name, const char* value) noexcept
-{
-      if(setenv(name, value, 1) == 0) {
-          return value;
-      }
-      return nullptr;
+template<typename Xt>
+inline bool  adt_find(const char* path, Xt*& device) noexcept {
+       device = static_cast<Xt*>(sys::adt_get_device(path));
+       if(device != nullptr) {
+          return true;
+       }
+       return false;
 }
 
 /*namespace sys*/ }
+
+/* g_adt
+   root of the Abstract Device Tree
+*/
+extern sys::directory* g_adt;
+#endif
