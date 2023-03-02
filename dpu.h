@@ -23,6 +23,7 @@
 **/
 #include "os.h"
 #include DPU_H
+#include <initializer_list>
 
 namespace dpu {
 

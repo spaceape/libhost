@@ -20,12 +20,13 @@
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include "device.h"
-#include <log.h>
+#include "path.h"
 
-constexpr char chr_path_split = '/';
-constexpr char chr_path_end = 0;
+constexpr char    path_split_chr = '/';
+constexpr char    path_end_chr = 0;
 
 namespace sys {
+namespace adt {
 
       device::device(unsigned int type) noexcept:
       m_type(type),
@@ -37,61 +38,55 @@ namespace sys {
 {
 }
 
-void  device::set_rc_enabled() noexcept
+auto  device::get_next(char* path, path_t* cwd_ptr) noexcept -> device*
 {
-      m_hooks = 1;
-}
-
-void  device::set_rc_disabled() noexcept
-{
-      // setting hooks to zero disables ref counting for the object;
-      // this will prevent the object from being freed when the device is not a dynamically allocated
-      m_hooks = 0;
-}
-
-device*  device::get_next(char* path_ptr, path_t* head_ptr) noexcept
-{
-      path_t l_trace;
-      char*  l_root     = path_ptr;
-      char*  l_next     = path_ptr;
-      bool   l_has_root = false;
+      char*  l_base     = path;
+      char*  l_next     = path;
+      bool   l_has_base = false;
       bool   l_has_next = false;
       // extract current path element and seek to the next
-      while(l_has_root == false) {
-          if((*l_next == chr_path_split) ||
-              (*l_next == chr_path_end)) {
-              l_has_root = true;
-              l_has_next = *l_next == chr_path_split;
+      while(l_has_base == false) {
+          if((*l_next == path_split_chr) ||
+              (*l_next == path_end_chr)) {
+              l_has_base = true;
+              l_has_next = *l_next == path_split_chr;
               *l_next = 0;
           }
           l_next++;
       }
-      // process current path element
-      if(l_has_root) {
-          int  l_root_length = l_next - l_root;
-          if(l_root[0] == '.') {
-              if(l_root[1] == '.') {
-                  if(head_ptr != nullptr) {
-                      return head_ptr->node->get_next(l_next, head_ptr->prev);
+      // process the current (base) path element
+      if(l_has_base) {
+          device* l_device_ptr;
+          int     l_base_length = l_next - l_base;
+          if(l_base_length >= 1) {
+              if(l_base[0] == '.') {
+                  if(l_base_length == 2) {
+                      if(l_base[1] == '.') {
+                          if(cwd_ptr->parent_ptr != nullptr) {
+                              return cwd_ptr->parent_ptr->device_ptr->get_next(l_next, cwd_ptr->parent_ptr);
+                          }
+                      }
+                  } else
+                  if(l_base_length == 1) {
+                      return get_next(l_next, cwd_ptr);
                   }
-                  return nullptr;
               }
-              return this;
-          }
-          device* l_device_ptr = get_entry_by_name(l_root, l_root_length);
-          if(l_has_next) {
-              if(l_device_ptr) { 
-                  l_trace.prev = head_ptr;
-                  l_trace.node = this;
-                  return l_device_ptr->get_next(l_next, std::addressof(l_trace));
+              l_device_ptr = get_entry_by_name(l_base);
+              if(l_has_next) {
+                  path_t l_device_path;
+                  if(l_device_ptr != nullptr) {
+                      l_device_path.parent_ptr = cwd_ptr;
+                      l_device_path.device_ptr = l_device_ptr;
+                      return l_device_ptr->get_next(l_next, std::addressof(l_device_path));
+                  }
               }
+              return l_device_ptr;
           }
-          return l_device_ptr;
       }
       return nullptr;
 }
 
-unsigned int  device::get_type() const noexcept
+auto  device::get_type() const noexcept -> unsigned int
 {
       return m_type;
 }
@@ -101,22 +96,20 @@ bool  device::has_type(unsigned int type) const noexcept
       return (m_type & type) == type;
 }
 
-unsigned int  device::get_id() const noexcept
+auto  device::get_next(char* path) noexcept -> device*
 {
-      return uuid_default;
+      path_t  l_cwd;
+      l_cwd.parent_ptr = nullptr;
+      l_cwd.device_ptr = this;
+      return  get_next(path, std::addressof(l_cwd));
 }
 
-bool  device::has_id(unsigned int id) const noexcept
-{
-      return get_id() == id;
-}
-
-device*  device::get_entry_by_name(const char*, int) noexcept
+auto  device::get_entry_by_name(const char*, int) noexcept -> device*
 {
       return nullptr;
 }
 
-device*  device::get_entry_by_index(int) noexcept
+auto  device::get_entry_by_index(int) noexcept -> device*
 {
       return nullptr;
 }
@@ -126,23 +119,16 @@ int   device::get_entry_count() noexcept
       return 0;
 }
 
-device*  device::get_at(char* path_ptr) noexcept
-{
-      return get_next(path_ptr, nullptr);
-}
-
-device*  device::hook() noexcept
+auto  device::hook() noexcept -> device*
 {
       if(m_hooks < std::numeric_limits<short int>::max()) {
-          if(m_hooks > 0) {
-              ++m_hooks;
-          }
+          ++m_hooks;
           return this;
       }
       return nullptr;
 }
 
-device*  device::drop() noexcept
+auto  device::drop() noexcept -> device*
 {
       if(m_hooks > 0) {
           --m_hooks;
@@ -157,11 +143,9 @@ void  device::yield(unsigned int) const noexcept
 {
 }
 
-void  device::sync(int) noexcept
+void  device::sync(float) noexcept
 {
 }
 
-void  device::list(int) noexcept
-{
-}
+/*namespace adt*/ }
 /*namespace sys*/ }

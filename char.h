@@ -60,7 +60,7 @@ class char_base
 /* char_ptr
    string class with variable size static buffer
 */
-template<size_t Size = global::cache_small_max, typename At = std::pmr::polymorphic_allocator<char>>
+template<size_t Size = global::cache_small_max, typename At = heap>
 class char_ptr: public char_base<At>
 {
   //size of members
@@ -175,7 +175,7 @@ class char_ptr: public char_base<At>
           base_type(allocator) {
   }
 
-  inline  char_ptr(const char* p, const At& allocator = std::pmr::get_default_resource()) noexcept:
+  inline  char_ptr(const char* p, const At& allocator = At()) noexcept:
           char_ptr(allocator) {
           reset(p);
   }

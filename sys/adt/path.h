@@ -1,5 +1,5 @@
-#ifndef sys_time_h
-#define sys_time_h
+#ifndef sys_adt_path_h
+#define sys_adt_path_h
 /** 
     Copyright (c) 2022, wicked systems
     All rights reserved.
@@ -22,17 +22,17 @@
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include <sys.h>
-#include <chrono>
+#include <sys/adt.h>
 
 namespace sys {
+namespace adt {
 
-using time_t = std::chrono::time_point<std::chrono::steady_clock>;
-using delay_t = std::chrono::duration<float>;
-
-constexpr float get_delay(const delay_t& delay) noexcept
+struct path_t
 {
-      return delay.count();
-}
+  path_t* parent_ptr;
+  device* device_ptr;
+};
 
+/*namespace adt*/ }
 /*namespace sys*/ }
 #endif

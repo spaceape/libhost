@@ -23,6 +23,7 @@
 **/
 #include "os.h"
 #include FPU_H
+#include <initializer_list>
 
 namespace fpu {
 

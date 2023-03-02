@@ -24,33 +24,33 @@
 #include <sys.h>
 
 namespace sys {
+namespace adt {
 
 class  node;
 class  device;
 class  directory;
 
-extern node*      adt_get_node(const char*) noexcept;
-extern device*    adt_get_device(const char*) noexcept;
-inline directory* adt_get_directory(const char*) noexcept;
+class  path_t;
 
-template<typename Xt>
-inline Xt*   adt_cast(const char* path) noexcept {
-      return static_cast<Xt*>(sys::adt_get_device(path));
-}
+directory* get_root() noexcept;
+device*    get_device(const char*) noexcept;
+directory* get_directory(const char*) noexcept;
 
-template<typename Xt>
-inline bool  adt_find(const char* path, Xt*& device) noexcept {
-       device = static_cast<Xt*>(sys::adt_get_device(path));
-       if(device != nullptr) {
-          return true;
-       }
-       return false;
-}
+/*namespace adt*/ }
 
+
+// template<typename Xt>
+// inline Xt*   adt_cast(const char* path) noexcept {
+//       return static_cast<Xt*>(sys::adt_get_device(path));
+// }
+
+// template<typename Xt>
+// inline bool  adt_find(const char* path, Xt*& device) noexcept {
+//        device = static_cast<Xt*>(sys::adt_get_device(path));
+//        if(device != nullptr) {
+//           return true;
+//        }
+//        return false;
+// }
 /*namespace sys*/ }
-
-/* g_adt
-   root of the Abstract Device Tree
-*/
-extern sys::directory* g_adt;
 #endif

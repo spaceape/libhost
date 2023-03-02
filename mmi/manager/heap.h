@@ -30,11 +30,6 @@
 */
 class heap: public resource
 {
-  protected:
-  virtual void*  do_allocate(std::size_t, std::size_t) noexcept override;
-  virtual void   do_deallocate(void*, std::size_t, std::size_t) noexcept override;
-  virtual bool   do_is_equal(const std::pmr::memory_resource&) const noexcept override;
-
   public:
   static  constexpr std::size_t alloc_bytes = 1024u;
   static  constexpr std::size_t fixed_bytes = 0u;
@@ -45,9 +40,11 @@ class heap: public resource
           heap(heap&&) noexcept;
   virtual ~heap();
 
+  virtual void*  allocate(std::size_t, std::size_t = alignof(std::max_align_t)) noexcept override;
   virtual void*  reallocate(void*, std::size_t, std::size_t, std::size_t, mmi::fixed) noexcept override;
   virtual void*  reallocate(void*, std::size_t, std::size_t, std::size_t, mmi::expand_throw) override;
   virtual void*  reallocate(void*, std::size_t, std::size_t, std::size_t, ...) noexcept override;
+  virtual void   deallocate(void*, std::size_t, std::size_t = alignof(std::max_align_t)) noexcept override;
   
   virtual std::size_t get_fixed_size() const noexcept override;
   virtual bool        has_variable_size() const noexcept override;

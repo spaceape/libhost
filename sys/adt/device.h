@@ -23,26 +23,17 @@
 **/
 #include <sys.h>
 #include <sys/adt.h>
-#include "tree.h"
 
 /* device
+   Base class for a device into the Abstract Device Tree
 */
 namespace sys {
+namespace adt {
 
 class device
 {
   unsigned short int  m_type;
   short int           m_hooks;
-
-  protected:
-  /* path_t
-     utility struct necessary to trace path elements for get_next()
-  */
-  struct path_t
-  {
-    path_t* prev;
-    device* node;
-  };
 
   public:
   /* type_*
@@ -59,10 +50,9 @@ class device
   static constexpr unsigned int type = type_undef;
 
   protected:
-          void     set_rc_enabled() noexcept;
-          void     set_rc_disabled() noexcept;
-  virtual device*  get_next(char*, path_t*) noexcept;
-  friend  class node;
+          device*  get_next(char*, path_t*) noexcept;
+
+  friend class directory;
 
   public:
           device(unsigned int) noexcept;
@@ -70,45 +60,23 @@ class device
           device(device&&) noexcept = delete;
   virtual ~device();
 
-          unsigned int get_type() const noexcept;
+          auto     get_type() const noexcept -> unsigned int;
           bool     has_type(unsigned int) const noexcept;
-  virtual unsigned int get_id() const noexcept;
-          bool     has_id(unsigned int) const noexcept;
 
+          device*  get_next(char*) noexcept;
   virtual device*  get_entry_by_name(const char*, int = 0) noexcept;
   virtual device*  get_entry_by_index(int) noexcept;
   virtual int      get_entry_count() noexcept;
-          device*  get_at(char*) noexcept;
 
           device*  hook() noexcept;
-          device*  drop() noexcept;          
-
-  static  device*  get_from_adt(const char* path) noexcept {
-          return   adt_get_device(path);
-  }
-
-  template<typename Xt>
-  static  Xt*      cast_from_adt(const char* path) noexcept {
-          return   static_cast<Xt*>(adt_get_device(path));
-  }
-
-  template<typename Xt, typename... Args>
-  static  Xt*       make(directory* root, const char* name, Args&&... args) noexcept {
-          if(auto
-              l_node = new(std::nothrow) dynamic_mount_point<Xt>(root, name, std::forward<Args>(args)...);
-              l_node != nullptr) {
-              return l_node->get_ptr();
-          }
-          return nullptr;
-  }
-
+          device*  drop() noexcept;
   virtual void     yield(unsigned int) const noexcept;
-  virtual void     sync(int) noexcept;
-  virtual void     list(int = 0) noexcept;
+  virtual void     sync(float) noexcept;
 
           device&  operator=(const device&) noexcept = delete;
           device&  operator=(device&&) noexcept = delete;
 };
 
+/*namespace adt*/ }
 /*namespace sys*/ }
 #endif

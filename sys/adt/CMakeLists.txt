@@ -8,7 +8,6 @@ include_directories(
 set(ADT_SRC_DIR ${SYS_SRC_DIR}/${NAME})
 
 set(inc
-  node.h device.h directory.h
 )
 
 if(SDK)

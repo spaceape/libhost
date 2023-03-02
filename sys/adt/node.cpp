@@ -20,90 +20,52 @@
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include "node.h"
-#include "directory.h"
 #include "device.h"
+#include "directory.h"
+#include <limits>
 
 namespace sys {
+namespace adt {
 
-      node::node(device* device_ptr) noexcept:
-      m_name(),
-      m_root(nullptr),
-      m_node_prev(nullptr),
-      m_node_next(nullptr),
-      m_device_ptr(device_ptr)
+      node::node(directory* owner, const char* name) noexcept:
+      node(owner, name, nullptr)
 {
-      if(device_ptr != nullptr) {
-          device_ptr->hook();
-      }
 }
 
-      node::node(const char* name, directory* directory_ptr, device* device_ptr) noexcept:
+      node::node(directory* owner, const char* name, device* device_ptr) noexcept:
+      p_owner(nullptr),
       m_name(name),
-      m_root(nullptr),
-      m_node_prev(nullptr),
-      m_node_next(nullptr),
-      m_device_ptr(device_ptr)
+      p_node_prev(nullptr),
+      p_node_next(nullptr),
+      m_hooks(1),
+      m_device(nullptr)
 {
-      if(device_ptr != nullptr) {
-          device_ptr->hook();
+      if(owner != nullptr) {
+          owner->link_node(this);
       }
-      if(directory_ptr != nullptr) {
-          directory_ptr->link_node(this);
+      if(device_ptr) {
+          m_device = device_ptr->hook();
       }
-}
-
-      node::node(const node& copy) noexcept:
-      node(copy.m_name, copy.m_root, copy.m_device_ptr)
-{
-}
-
-      node::node(node&& copy) noexcept:
-      node(copy.m_name, copy.m_root, copy.m_device_ptr)
-{
-      copy.m_device_ptr->drop();
-      copy.m_device_ptr = nullptr;
 }
 
       node::~node()
 {
-      if(m_root != nullptr) {
-          m_root->drop_node(this);
+      if(m_device) {
+          m_device = m_device->drop();
       }
-      if(m_device_ptr != nullptr) {
-          m_device_ptr->drop();
+      if(p_owner != nullptr) {
+          p_owner->drop_node(this);
       }
-}
-
-void  node::enable_device_rc() noexcept
-{
-      if(m_device_ptr) {
-          m_device_ptr->set_rc_enabled();
-      }
-}
-
-void  node::disable_device_rc() noexcept
-{
-      if(m_device_ptr) {
-          m_device_ptr->set_rc_disabled();
-      }
-}
-
-void  node::adt_attach(directory*) noexcept
-{
-}
-
-void  node::adt_detach(directory*) noexcept
-{
 }
 
 bool  node::has_root() const noexcept
 {
-      return m_root != nullptr;
+      return p_owner != nullptr;
 }
 
 bool  node::has_root(directory* root) const noexcept
 {
-      return m_root == root;
+      return p_owner == root;
 }
 
 bool  node::has_name(const char* name, int name_length) const noexcept
@@ -116,55 +78,53 @@ auto  node::get_name() const noexcept -> const char*
       return m_name;
 }
 
+bool  node::has_type(unsigned int type) const noexcept
+{
+      if(m_device != nullptr) {
+          return m_device->has_type(type);
+      }
+      return type == device::type_undef;
+}
+
+auto  node::get_type() const noexcept -> unsigned int
+{
+      if(m_device != nullptr) {
+          return m_device->get_type();
+      }
+      return device::type_undef;
+}
+
 device* node::get_device() const noexcept
 {
-      return m_device_ptr;
+      return m_device;
 }
 
-device* node::get_device_hook() noexcept
+node* node::hook() noexcept
 {
-      return m_device_ptr->hook();
+      if(m_hooks < std::numeric_limits<short int>::max()) {
+          ++m_hooks;
+          return this;
+      }
+      return nullptr;
 }
 
-void  node::sync(int dt) noexcept
+node* node::drop() noexcept
 {
-      m_device_ptr->sync(dt);
-}
-
-bool  node::is_attached() const noexcept
-{
-      return m_root != nullptr;
-}
-
-node& node::operator=(const node& rhs) noexcept
-{
-      if(std::addressof(rhs) != this) {
-          m_name = rhs.m_name;
-          if(m_device_ptr != rhs.m_device_ptr) {
-              if(m_device_ptr != nullptr) {
-                  m_device_ptr->drop();
-              }
-              if(m_device_ptr = rhs.m_device_ptr; m_device_ptr != nullptr) {
-                  m_device_ptr->hook();
-              }
+      if(m_hooks > 0) {
+          --m_hooks;
+          if(m_hooks == 0) {
+              delete this;
           }
       }
-      return *this;
+      return nullptr;
 }
 
-node& node::operator=(node&& rhs) noexcept
+void  node::sync(float dt) noexcept
 {
-      if(std::addressof(rhs) != this) {
-          m_name = rhs.m_name;
-          if(m_device_ptr != rhs.m_device_ptr) {
-              if(m_device_ptr != nullptr) {
-                  m_device_ptr->drop();
-              }
-              m_device_ptr = rhs.m_device_ptr;
-              rhs.m_device_ptr = nullptr;
-          }
+      if(m_device != nullptr) {
+          m_device->sync(dt);
       }
-      return *this;
 }
 
+/*namespace adt*/ }
 /*namespace sys*/ }

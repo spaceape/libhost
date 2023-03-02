@@ -24,11 +24,14 @@
 #include <sys.h>
 #include <sys/adt.h>
 #include "device.h"
-#include "tree.h"
+#include "node.h"
+#include <memory>
+#include <type_traits>
 
-/* device
+/* directory
 */
 namespace sys {
+namespace adt {
 
 class directory: public device
 {
@@ -48,24 +51,43 @@ class directory: public device
   virtual ~directory();
 
   template<typename Xt, typename... Args>
-  inline  node*    make_node(const char* name, Args&&... args) noexcept {
-          auto l_node = new(std::nothrow) dynamic_mount_point<Xt>(this, name, std::forward<Args>(args)...);
-          if(l_node->has_root(nullptr)) {
-              delete l_node;
-              return nullptr;
+  inline  node*   make_node(const char* name, Args&&... args) noexcept {
+          auto l_device_ptr = new(std::nothrow) Xt(std::forward<Args>(args)...);
+          if(l_device_ptr != nullptr) {
+              auto l_node_ptr = new(std::nothrow) node(this, name, l_device_ptr);
+              l_device_ptr->drop();
+              return l_node_ptr;
           }
-          return l_node;
+          return nullptr;
   }
 
-  inline  node*    make_link(const char* name, node* source) noexcept {
-          auto l_node = new(std::nothrow) linked_mount_point(this, name, source);
-          if(l_node->has_root(nullptr)) {
-              delete l_node;
-              return nullptr;
+  template<typename Xt, typename... Args>
+  inline  auto    make_link(const char* name, Xt* device_ptr) noexcept -> Xt* {
+          auto l_device_ptr = device_ptr;
+          if(device_ptr != nullptr) {
+              auto l_node_ptr = new(std::nothrow) node(this, name, l_device_ptr);
+              if(l_node_ptr != nullptr) {
+                  return l_device_ptr;
+              }
           }
-          return l_node;
+          return nullptr;
   }
-  
+
+  template<typename Xt, typename... Args>
+  inline  auto    make_device(const char* name, Args&&... args) noexcept -> Xt* {
+          auto l_device_ptr = new(std::nothrow) Xt(std::forward<Args>(args)...);
+          if(l_device_ptr != nullptr) {
+              auto l_node_ptr = new(std::nothrow) node(this, name, l_device_ptr);
+              l_device_ptr->drop();
+              return l_device_ptr;
+          }
+          return nullptr;
+  }
+
+  inline  auto     make_directory(const char* name) noexcept -> directory* {
+          return make_device<directory>(name);
+  }
+
           bool     link_node(node*) noexcept;
 
   virtual device*  get_entry_by_name(const char*, int = 0) noexcept override;
@@ -74,17 +96,16 @@ class directory: public device
           
           bool     drop_node(node*) noexcept;
  
-  static  directory* get_from_adt(const char* path) noexcept {
-          return adt_cast<sys::directory>(path);
-  }          
+  virtual void     sync(float) noexcept override;
 
-  virtual void     sync(int) noexcept override;
+  inline  operator directory*() noexcept {
+          return this;
+  }
   
-  virtual void     list(int = 0) noexcept override;
-
           directory&  operator=(const directory&) noexcept = delete;
           directory&  operator=(directory&&) noexcept = delete;
 };
 
+/*namespace adt*/ }
 /*namespace sys*/ }
 #endif

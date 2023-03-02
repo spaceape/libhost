@@ -69,6 +69,11 @@ static resource*  s_default_resource = resource::set_default(nullptr);
 {
 }
 
+void* resource::allocate(std::size_t bytes, std::size_t alignment) noexcept
+{
+      return nullptr;
+}
+
 void* resource::reallocate(void*, std::size_t, std::size_t, std::size_t, mmi::fixed) noexcept
 {
       return nullptr;
@@ -86,6 +91,10 @@ void* resource::reallocate(void*, std::size_t, std::size_t, std::size_t, mmi::ex
 void* resource::reallocate(void*, std::size_t, std::size_t, std::size_t, ...) noexcept
 {
       return nullptr;
+}
+
+void  resource::deallocate(void*, std::size_t, std::size_t)
+{
 }
 
 resource* resource::get_default() noexcept
@@ -146,19 +155,9 @@ resource& resource::operator=(resource&&) noexcept
 {
 }
 
-void* heap::do_allocate(std::size_t size, std::size_t align) noexcept
+void* heap::allocate(std::size_t size, std::size_t align) noexcept
 {
-      return aligned_alloc(align, size);
-}
-
-void  heap::do_deallocate(void* p, std::size_t, std::size_t) noexcept
-{
-      free(p);
-}
-
-bool  heap::do_is_equal(const std::pmr::memory_resource&) const noexcept
-{
-      return true;
+      return malloc(size);
 }
 
 void* heap::reallocate(void* p, std::size_t, std::size_t new_size, std::size_t align, mmi::fixed) noexcept
@@ -166,7 +165,7 @@ void* heap::reallocate(void* p, std::size_t, std::size_t new_size, std::size_t a
       if(p) {
           return nullptr;
       } else
-          return aligned_alloc(align, new_size);
+          return malloc(new_size);
 }
 
 void* heap::reallocate(void* p, std::size_t size, std::size_t, std::size_t align, mmi::expand_throw)
@@ -178,7 +177,7 @@ void* heap::reallocate(void* p, std::size_t size, std::size_t, std::size_t align
           return nullptr;
       #endif
       } else
-          return aligned_alloc(align, size);
+          return malloc(size);
 }
 
 void* heap::reallocate(void* p, std::size_t, std::size_t new_size, std::size_t align, ...) noexcept
@@ -189,7 +188,12 @@ void* heap::reallocate(void* p, std::size_t, std::size_t new_size, std::size_t a
           } else
               return nullptr;
       } else
-          return aligned_alloc(align, new_size);
+          return realloc(p, new_size);
+}
+
+void  heap::deallocate(void* p, std::size_t, std::size_t) noexcept
+{
+      free(p);
 }
 
 std::size_t heap::get_fixed_size() const noexcept

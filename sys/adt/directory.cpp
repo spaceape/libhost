@@ -21,9 +21,9 @@
 **/
 #include "directory.h"
 #include "node.h"
-#include "pico/stdio.h"
 
 namespace sys {
+namespace adt {
 
       directory::directory() noexcept:
       device(type),
@@ -42,16 +42,15 @@ namespace sys {
 
 bool  directory::link_node(node* node_ptr) noexcept
 {
-      if(node_ptr->m_root == nullptr) {
-          node_ptr->m_root = this;
-          node_ptr->m_node_next = nullptr;
-          node_ptr->m_node_prev = m_node_tail;
-          if(node_ptr->m_node_prev != nullptr) {
-              node_ptr->m_node_prev->m_node_next = node_ptr;
+      if(node_ptr->p_owner == nullptr) {
+          node_ptr->p_owner = this;
+          node_ptr->p_node_next = nullptr;
+          node_ptr->p_node_prev = m_node_tail;
+          if(node_ptr->p_node_prev != nullptr) {
+              node_ptr->p_node_prev->p_node_next = node_ptr;
           } else
               m_node_head = node_ptr;
           m_node_tail = node_ptr;
-          m_node_tail->adt_attach(this);
           return true;
       }
       return false;
@@ -61,10 +60,10 @@ device*  directory::get_entry_by_name(const char* name, int name_length) noexcep
 {
       node* i_node = m_node_head;
       while(i_node) {
-          if(i_node->has_name(name)) {
+          if(i_node->has_name(name, name_length)) {
               return i_node->get_device();
           }
-          i_node = i_node->m_node_next;
+          i_node = i_node->p_node_next;
       }
       return nullptr;
 }
@@ -78,7 +77,7 @@ device*  directory::get_entry_by_index(int index) noexcept
               return i_node->get_device();
           }
           ++l_index;
-          i_node = i_node->m_node_next;
+          i_node = i_node->p_node_next;
       }
       return nullptr;
 }
@@ -89,32 +88,32 @@ int   directory::get_entry_count() noexcept
       node* i_node = m_node_head;
       while(i_node) {
           ++l_count;
-          i_node = i_node->m_node_next;
+          i_node = i_node->p_node_next;
       }
       return l_count;
 }
 
 bool  directory::drop_node(node* node_ptr) noexcept
 {
-      if(node_ptr->m_root == this) {
-          if(node_ptr->m_node_next != nullptr) {
-              node_ptr->m_node_next->m_node_prev = node_ptr->m_node_prev;
+      if(node_ptr->p_owner == this) {
+          if(node_ptr->p_node_next != nullptr) {
+              node_ptr->p_node_next->p_node_prev = node_ptr->p_node_prev;
           } else
-              m_node_tail = node_ptr->m_node_prev;
-          if(node_ptr->m_node_prev != nullptr) {
-              node_ptr->m_node_prev->m_node_next = node_ptr->m_node_next;
+              m_node_tail = node_ptr->p_node_prev;
+          if(node_ptr->p_node_prev != nullptr) {
+              node_ptr->p_node_prev->p_node_next = node_ptr->p_node_next;
           } else
-              m_node_head = node_ptr->m_node_next;
-          node_ptr->m_node_next = nullptr;
-          node_ptr->m_node_prev = nullptr;
-          node_ptr->m_root = nullptr;
-          node_ptr->adt_detach(this);
+              m_node_head = node_ptr->p_node_next;
+          node_ptr->p_node_next = nullptr;
+          node_ptr->p_node_prev = nullptr;
+          node_ptr->p_owner = nullptr;
+          node_ptr->drop();
       }
       return true;
 }
 
 
-void  directory::sync(int dt) noexcept
+void  directory::sync(float dt) noexcept
 {
       node* i_node = m_node_head;
       while(i_node) {
@@ -123,25 +122,9 @@ void  directory::sync(int dt) noexcept
               l_device != nullptr) {
               l_device->sync(dt);
           }
-          i_node = i_node->m_node_next;
+          i_node = i_node->p_node_next;
       }
 }
 
-void  directory::list(int depth) noexcept
-{
-      node* i_node = m_node_head;
-      while(i_node) {
-          for(int i_indent = 0; i_indent < depth; i_indent++) {
-              printf("  ");
-          }
-          printf("%s\n", i_node->get_name());
-          if(device*
-              l_device = i_node->get_device();
-              l_device != nullptr) {
-              l_device->list(depth + 1);
-          }
-          i_node = i_node->m_node_next;
-      }
-}
-
+/*namespace adt*/ }
 /*namespace sys*/ }

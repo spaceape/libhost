@@ -22,23 +22,21 @@
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include <global.h>
-#include <memory_resource>
+#include <cstddef>
 
-class resource: public std::pmr::memory_resource
+class resource
 {
-  protected:
-  virtual void*  do_allocate(std::size_t, std::size_t) noexcept override = 0;
-  virtual bool   do_is_equal(const std::pmr::memory_resource&) const noexcept override = 0;
-
   public:
           resource() noexcept;
           resource(const resource&) noexcept;
           resource(resource&&) noexcept;
           ~resource();
 
+  virtual void*  allocate(std::size_t, std::size_t = alignof(std::max_align_t)) noexcept;
   virtual void*  reallocate(void*, std::size_t, std::size_t, std::size_t, mmi::fixed) noexcept;
   virtual void*  reallocate(void*, std::size_t, std::size_t, std::size_t, mmi::expand_throw);
   virtual void*  reallocate(void*, std::size_t, std::size_t, std::size_t, ...) noexcept;
+  virtual void   deallocate(void*, std::size_t, std::size_t = alignof(std::max_align_t)) noexcept;
 
   inline  bool        has_fixed_size() const noexcept {
           return get_fixed_size();

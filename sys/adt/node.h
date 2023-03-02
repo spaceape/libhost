@@ -1,5 +1,5 @@
-#ifndef sys_node_h
-#define sys_node_h
+#ifndef sys_adt_node_h
+#define sys_adt_node_h
 /** 
     Copyright (c) 2022, wicked systems
     All rights reserved.
@@ -24,49 +24,50 @@
 #include <sys.h>
 #include <sys/adt.h>
 #include <char.h>
+#include <memory>
+
+namespace sys {
+namespace adt {
 
 /* node
+   Base class for an entry into the Abstract Device Tree
 */
-namespace sys {
-
 class node
 {
+  directory*  p_owner;
   char_ptr<>  m_name;
-  directory*  m_root;
-  node*       m_node_prev;
-  node*       m_node_next;
+  node*       p_node_prev;
+  node*       p_node_next;
+  short int   m_hooks;
 
   protected:
-  device*     m_device_ptr;
+  device*     m_device;
 
-  protected:
-          void  enable_device_rc() noexcept;
-          void  disable_device_rc() noexcept;
-  virtual void  adt_attach(directory*) noexcept;
-  virtual void  adt_detach(directory*) noexcept;
-  friend  class directory;
-
+  friend class directory;
   public:
-          node(device* = nullptr) noexcept;
-          node(const char*, directory*, device* = nullptr) noexcept;
-          node(const node&) noexcept;
-          node(node&&) noexcept;
-  virtual ~node();
+          node(directory*, const char*) noexcept;
+          node(directory*, const char*, device*) noexcept;
+          node(const node&) noexcept = delete;
+          node(node&&) noexcept = delete;
+          ~node();
 
           bool    has_root() const noexcept;
-          bool    has_root(directory*) const noexcept;
-          bool    has_name(const char*, int = 0) const noexcept;
+          bool    has_root(directory* root) const noexcept;
+          bool    has_name(const char* name, int name_length) const noexcept;
           auto    get_name() const noexcept -> const char*;
-          device* get_device() const noexcept;
-          device* get_device_hook() noexcept;
+          bool    has_type(unsigned int) const noexcept;
+          auto    get_type() const noexcept -> unsigned int;
+          auto    get_device() const noexcept -> device*;
 
-          void    sync(int) noexcept;
+          node*   hook() noexcept;
+          node*   drop() noexcept;
 
-          bool    is_attached() const noexcept;
+          void    sync(float) noexcept;
 
           device* operator->() const noexcept;
-          node&   operator=(const node&) noexcept;
-          node&   operator=(node&&) noexcept;
+          node&   operator=(const node&) noexcept = delete;
+          node&   operator=(node&&) noexcept = delete;
 };
+/*namespace adt*/ }
 /*namespace sys*/ }
 #endif

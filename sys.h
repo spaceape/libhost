@@ -74,9 +74,4 @@ constexpr int SEEK_END = 2;
 #endif 
 
 constexpr unsigned int pin_none = 256;
-
-/* g_adt
-   root of the Abstract Device Tree
-*/
-extern sys::directory* g_adt;
 #endif

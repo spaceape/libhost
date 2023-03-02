@@ -3,12 +3,10 @@ set(NAME "host")
 set(PREFIX)
 
 add_definitions(
-  -fPIC
   -DCPU=${CPU}
   -DDPU=${DPU} -DDPU_H=<dpu/${DPU}.h>
   -DFPU=${FPU} -DFPU_H=<fpu/${FPU}.h>
   -DGPU=${GPU} -DGPU_H=<gpu/${GPU}.h>
-  -DPIC
 )
 
 include_directories(
@@ -26,14 +24,15 @@ set(inc
 set(srcs
   error.cpp log.cpp dbg.cpp dpu/${DPU}.cpp fpu/${FPU}.cpp gpu/${GPU}.cpp
   mmi/mmi.cpp
-  sys/adt/adt.cpp sys/adt/node.cpp sys/adt/device.cpp sys/adt/directory.cpp
-  sys/arg.cpp sys/argv.cpp sys/asio.cpp
+  sys/adt/node.cpp sys/adt/device.cpp sys/adt/directory.cpp sys/adt/adt.cpp 
+  sys/arg.cpp sys/argv.cpp
+  sys/asio.cpp
   sys/ios/rio.cpp sys/ios/sio.cpp sys/ios/fio.cpp sys/ios/tty.cpp sys/ios/net.cpp sys/ios/bio.cpp sys/ios/pio.cpp
   sys/ios.cpp sys/sys.cpp
 )
 
 set(libs
-  m pico_stdlib
+  m
 )
 
 add_subdirectory(dpu)
@@ -45,7 +44,13 @@ add_subdirectory(hash)
 
 add_library(${NAME} STATIC ${srcs})
 set_target_properties(${NAME} PROPERTIES PREFIX "${PREFIX}")
-target_link_libraries(${NAME} ${libs})
+target_link_libraries(
+  ${NAME}
+  PUBLIC
+    ${libs}
+  PRIVATE
+    pico_stdlib
+)
 
 if(SDK)
   file(MAKE_DIRECTORY ${HOST_SDK_DIR})

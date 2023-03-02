@@ -21,32 +21,32 @@
 **/
 #include <sys.h>
 #include <sys/adt.h>
-#include "device.h"
 #include "directory.h"
-#include <cstring>
-#include <util.h>
+
+constexpr char    path_root_chr = '/';
+constexpr int     path_reserve_bytes = 64;
 
 namespace sys {
+namespace adt {
+ 
+static directory  s_adt_root;
+static char*      s_adt_path_cache;
+static int        s_adt_path_size;
 
-constexpr char chr_path_root = '/';
-constexpr int  chr_reserve_bytes = 32;
 
-static char* s_adt_path_cache;
-static int   s_adt_path_size;
-
-node*   adt_get_entry(const char* path) noexcept
+directory* get_root() noexcept
 {
-      return nullptr;
+      return std::addressof(s_adt_root);
 }
 
-device* adt_get_device(const char* path) noexcept
+device* get_device(const char* path) noexcept
 {
-      sys::device* l_device = nullptr;
+      sys::adt::device* l_device = nullptr;
       if(path != nullptr) {
           char* l_path_ptr;
           int   l_path_size = std::strlen(path) + 1;
-          int   l_path_reserve = get_round_value(l_path_size, chr_reserve_bytes);
-          // reserve memory for the path object
+          int   l_path_reserve = get_round_value(l_path_size, path_reserve_bytes);
+          // reserve memory for the temporary path object
           if(l_path_reserve > s_adt_path_size) {
               s_adt_path_cache = reinterpret_cast<char*>(realloc(s_adt_path_cache, l_path_reserve));
               if(s_adt_path_cache == nullptr) {
@@ -55,22 +55,15 @@ device* adt_get_device(const char* path) noexcept
               s_adt_path_size = l_path_reserve;
           }
           l_path_ptr = reinterpret_cast<char*>(std::memcpy(s_adt_path_cache, path, l_path_size));
-          // process header
-          if(l_path_ptr[0] == chr_path_root) {
-              l_path_ptr += 1;
+          // remove root directory prefix slashes
+          while(*l_path_ptr == path_root_chr) {
+              ++l_path_ptr;
           }
           // browse path
-          l_device = g_adt->get_at(l_path_ptr);
+          l_device = s_adt_root.get_next(l_path_ptr);
       }
       return l_device;
 }
 
-directory* adt_get_directory(const char* path) noexcept
-{
-      sys::device* l_device = adt_get_device(path);
-      if(l_device != nullptr) {
-          return static_cast<directory*>(l_device);
-      }
-      return nullptr;
-}
+/*namespace adt*/ }
 /*namespace sys*/ }

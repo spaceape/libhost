@@ -1,5 +1,5 @@
-#ifndef sys_tree_h
-#define sys_tree_h
+#ifndef sys_adt_tree_h
+#define sys_adt_tree_h
 /** 
     Copyright (c) 2022, wicked systems
     All rights reserved.
@@ -23,89 +23,31 @@
 **/
 #include <sys.h>
 #include "node.h"
-
-namespace sys {
+#include <type_traits>
 
 template<typename Xt>
-class static_mount_point: public node
+class mount_point: public sys::adt::node
 {
-  protected:
-  Xt      m_device_inst;
+  public:
+  using   device_type = typename std::remove_cv<Xt>::type;
 
   public:
   template<typename... Args>
-          static_mount_point(directory* root, const char* name, Args&&... args) noexcept:
-          node(name, root),
-          m_device_inst(std::forward<Args>(args)...) {
-          m_device_ptr = std::addressof(m_device_inst);
-          // shouldn't let this device be reference counted as freeing it would end tragically
-          disable_device_rc();
+  inline  mount_point(sys::adt::directory* owner, const char* name, Args&&... args) noexcept:
+          node(owner, name, std::make_shared<Xt>(std::forward<Args>(args)...)) {
   }
 
-  inline  static_mount_point(const static_mount_point& copy) noexcept = delete;
-  inline  static_mount_point(static_mount_point&& copy) noexcept = delete;
+  inline  mount_point(const mount_point&) noexcept = delete;
+  inline  mount_point(mount_point&&) noexcept = delete;
 
-  virtual  ~static_mount_point() {
+  inline  ~mount_point() {
   }
 
-  inline  Xt* get_ptr() noexcept {
-          return std::addressof(m_device_inst);
-  }
-  
-  inline  Xt* operator->() noexcept {
-          return std::addressof(m_device_inst);
+  inline  device_type* operator->() const noexcept {
+          return static_cast<device_type*>(m_device);
   }
 
-  inline  operator Xt*() noexcept {
-          return std::addressof(m_device_inst);
-  }
-
-  inline  static_mount_point& operator=(const static_mount_point& copy) noexcept = delete;
-  inline  static_mount_point& operator=(static_mount_point&& copy) noexcept = delete;
+  inline  mount_point& operator=(const mount_point&) noexcept = delete;
+  inline  mount_point& operator=(mount_point&&) noexcept = delete;
 };
-
-template<typename Xt>
-class dynamic_mount_point: public static_mount_point<Xt>
-{
-  protected:
-  virtual void  adt_attach(directory*) noexcept override {           
-  }
-
-  virtual void  adt_detach(directory*) noexcept override {
-          delete this;
-  }
-
-  public:
-  template<typename... Args>
-          dynamic_mount_point(directory* root, const char* name, Args&&... args) noexcept:
-          static_mount_point<Xt>(root, name, std::forward<Args>(args)...) {
-  }
-
-  virtual  ~dynamic_mount_point() {
-  }
-};
-
-class linked_mount_point: public node
-{
-  protected:
-  virtual void  adt_attach(directory*) noexcept override {           
-  }
-
-  virtual void  adt_detach(directory*) noexcept override {
-          delete this;
-  }
-
-  public:
-          linked_mount_point(directory* root, const char* name, node* source) noexcept:
-          node(name, root) {
-          if(source != nullptr) {
-              m_device_ptr = source->get_device_hook();
-          }
-  }
-
-  inline  ~linked_mount_point() {
-  }
-};
-
-/*namespace sys*/ }
 #endif

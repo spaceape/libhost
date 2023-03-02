@@ -29,6 +29,7 @@
 #include <stdexcept>
 #endif
 #include "dbg.h"
+#include <new>
 
 #define __str_of(s) #s
 #define __name_of(d) __str_of(d)
