@@ -66,6 +66,7 @@ void  printdbg(const char* message, ...) noexcept
       va_start(va, message);
       vfprintf(stderr, message, va);
       va_end(va);
+      fprintf(stderr, "\n");
 #endif
 }
 

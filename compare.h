@@ -110,6 +110,23 @@ constexpr int compare(const char* lhs, const char* rhs) noexcept
         return 0;
 }
 
+constexpr int compare(const std::string lhs, const char* rhs) noexcept
+{
+    if(lhs.size()) {
+        if(rhs && rhs[0]) {
+            return std::strcmp(lhs.c_str(), rhs);
+        } else
+            return lhs[0];
+    } else
+    if(rhs) {
+        if(rhs[0]) {
+            return -rhs[0];
+        } else
+            return 0;
+    } else
+        return 0;
+}
+
 template<typename Ct>
 constexpr int compare(Ct lhs, Ct rhs) noexcept
 {

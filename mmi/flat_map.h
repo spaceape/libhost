@@ -183,6 +183,19 @@ class flat_map: public flat_map_traits<Kt, Xt>::base_type
               return base_type::end();
   }
 
+  /* find_by_value()
+  */
+  inline  iterator_type find_by_value(const value_type& value) noexcept {
+          iterator_type i_pos = base_type::begin();
+          while(i_pos != base_type::end()) {
+              if(i_pos->value == value) {
+                  break; 
+              }
+              ++i_pos;
+          }
+          return i_pos;
+  }
+
   /* insert()
   */
           iterator_type insert(key_type key) noexcept {
@@ -310,7 +323,7 @@ class flat_map: public flat_map_traits<Kt, Xt>::base_type
 
   /* clear()
   */
-  inline  void clear(size_t /*count*/) noexcept {
+  inline  void clear() noexcept {
           base_type::clear();
   }
 

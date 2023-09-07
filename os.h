@@ -37,8 +37,23 @@ constexpr char  gpu_name[] = __name_of(GPU);
 constexpr bool  is_lsb = true;
 constexpr bool  is_msb =(is_lsb == false);
 
-constexpr bool  is_linux = LINUX;
-constexpr bool  is_unix  = is_linux || UNIX;
+#ifdef LINUX
+constexpr bool  is_linux = (LINUX != 0);
+constexpr bool  is_unix  = is_linux;
+#else
+constexpr bool  is_linux = false;
+#ifdef UNIX
+constexpr bool  is_unix  = (UNIX != 0);
+#else
+constexpr bool  is_unix  = false;
+#endif
+#endif
+
+#ifdef WINDOWS
+constexpr bool  is_windows = (WINDOWS != 0);
+#else
+constexpr bool  is_windows = false;
+#endif
 
 constexpr int   memory_page_size = 4096;
 constexpr int   filesystem_block_size = 1024;

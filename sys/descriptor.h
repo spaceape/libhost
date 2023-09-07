@@ -35,17 +35,17 @@ class descriptor
           descriptor(const descriptor&) noexcept;
           descriptor(descriptor&&) noexcept;
           ~descriptor();
-          void clone(int) noexcept;
-          void reset() noexcept;
-          void reset(int) noexcept;
-          void release() noexcept;
-          void dispose(bool = true) noexcept;
-          int  get_value() const noexcept;
-          bool get_defined(bool = true) const noexcept;
+          void        clone(int) noexcept;
+          void        reset() noexcept;
+          void        reset(int) noexcept;
+          void        release() noexcept;
+          void        dispose(bool = true) noexcept;
+          int         get_value() const noexcept;
+          bool        get_defined(bool = true) const noexcept;
           operator int() const noexcept;
-  descriptor&  operator=(int) noexcept;
-  descriptor&  operator=(const descriptor&) noexcept;
-  descriptor&  operator=(descriptor&&) noexcept;
+          descriptor& operator=(int) noexcept;
+          descriptor& operator=(const descriptor&) noexcept;
+          descriptor& operator=(descriptor&&) noexcept;
 };
 
 /*namespace sys*/ }
