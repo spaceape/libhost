@@ -212,13 +212,13 @@ int   argv::load(char* str, int) noexcept
 {
       char* l_str_iter  = str;
       int   l_arg_index = 0;
-      while(*l_str_iter) {
-          bool l_has_next = false;
-          if((*l_str_iter >= SPC) &&
-              (*l_str_iter <= ASCII_MAX)) {
-              char* l_arg_base = l_str_iter;
-              int   l_arg_length = arg_extract_next(l_arg_base, l_str_iter, l_has_next);
-              if(l_arg_length >= 0) {
+      if(str != nullptr) {
+          while(*l_str_iter) {
+              bool l_has_next = false;
+              if((*l_str_iter >= SPC) &&
+                  (*l_str_iter <= ASCII_MAX)) {
+                  char* l_arg_base = l_str_iter;
+                  int   l_arg_length = arg_extract_next(l_arg_base, l_str_iter, l_has_next);
                   if(l_arg_length > 0) {
                       if(l_arg_index < arg_near_reserve) {
                           m_arg_near[l_arg_index] = arg(l_arg_base, l_arg_length);
@@ -249,23 +249,23 @@ int   argv::load(char* str, int) noexcept
                           break;
                       }
                       l_arg_index++;
+                  } else
+                  if(l_arg_length < 0) {
+                      printdbg(
+                          "Error while parsing argument %d.\n"
+                          " \"  %s \" ",
+                          __FILE__,
+                          __LINE__,
+                          l_arg_index,
+                          str
+                      );
+                      l_arg_index = 0;
+                      break;
                   }
               }
-              else {
-                  printdbg(
-                      "Error while parsing argument %d.\n"
-                      " \"  %s \" ",
-                      __FILE__,
-                      __LINE__,
-                      l_arg_index,
-                      str
-                  );
-                  l_arg_index = 0;
-                  break;
+              if(l_has_next) {
+                  l_str_iter++;
               }
-          }
-          if(l_has_next) {
-              l_str_iter++;
           }
       }
       m_arg_count = l_arg_index;

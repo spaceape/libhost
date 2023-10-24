@@ -24,7 +24,8 @@
 #include "global.h"
 
 constexpr int err_okay = 0;
-constexpr int err_fail = 255;
+constexpr int err_done = 127;
+constexpr int err_fail = -128;
 
 constexpr unsigned int lvl_info = 0u;
 constexpr unsigned int lvl_warning = 0x01000000;

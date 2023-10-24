@@ -84,7 +84,7 @@ class pool
   template<typename... Args>
   inline  bool schedule(Args&&... args) noexcept {
           // fast scheduling
-          // try to find a less busy queue than the current one, but not necessarily the least busy one
+          // try to find a less busy queue than the current one, but not necessarily the least busiest one
           if constexpr (Policy == pxi_policy_fast) {
               int   l_fuel     = m_queue_count;
               float l_load_min = std::numeric_limits<float>::infinity();
@@ -108,7 +108,7 @@ class pool
           }
 
           // min scheduling
-          // try to find the least busy queue
+          // try to find the least busiest queue
           if constexpr (Policy == pxi_policy_min) {
               int   l_index_new;
               float l_load_new = 0;
