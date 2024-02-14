@@ -2,13 +2,6 @@ project(host)
 set(NAME "host")
 set(PREFIX)
 
-add_definitions(
-  -DCPU=${CPU}
-  -DDPU=${DPU} -DDPU_H=<dpu/${DPU}.h>
-  -DFPU=${FPU} -DFPU_H=<fpu/${FPU}.h>
-  -DGPU=${GPU} -DGPU_H=<gpu/${GPU}.h>
-)
-
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -24,7 +17,6 @@ set(inc
 set(srcs
   error.cpp log.cpp dbg.cpp dpu/${DPU}.cpp fpu/${FPU}.cpp gpu/${GPU}.cpp
   mmi/mmi.cpp
-  sys/adt/node.cpp sys/adt/device.cpp sys/adt/directory.cpp sys/adt/adt.cpp 
   sys/arg.cpp sys/argv.cpp
   sys/asio.cpp
   sys/ios/rio.cpp sys/ios/sio.cpp sys/ios/fio.cpp sys/ios/tty.cpp sys/ios/net.cpp sys/ios/bio.cpp sys/ios/pio.cpp

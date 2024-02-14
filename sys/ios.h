@@ -24,6 +24,7 @@
 #include <os.h>
 #include <sys.h>
 #include "fmt.h"
+#include <cstring>
 
 namespace sys {
 

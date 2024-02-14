@@ -23,7 +23,6 @@
 **/
 #include "flat_set_traits.h"
 #include <compare.h>
-#include <memory_resource>
 
 namespace mmi {
   
@@ -130,25 +129,16 @@ class flat_set: public flat_set_traits<Xt>::base_type
   }
 
   public:
-  inline  flat_set(
-              std::pmr::memory_resource* r = resource::get_default(),
-              bool replace = false,
-              bool remove = true
-          ) noexcept:
-          base_type(r),
+  inline  flat_set(bool replace = false, bool remove = true) noexcept:
+          base_type(),
           m_pos(base_type::end()),
           m_replace_bit(replace),
           m_remove_bit(remove) {
           m_pos = base_type::end();
   }
 
-  inline  flat_set(
-              std::pmr::memory_resource* r,
-              size_t reserve,
-              bool replace = false,
-              bool remove = true
-          ) noexcept:
-          base_type(r),
+  inline  flat_set(size_t reserve, bool replace = false, bool remove = true) noexcept:
+          base_type(),
           m_pos(base_type::end()),
           m_replace_bit(replace),
           m_remove_bit(remove) {

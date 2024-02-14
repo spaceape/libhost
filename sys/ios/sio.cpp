@@ -23,13 +23,7 @@
 #include <cstring>
 
       sio::sio(int size) noexcept:
-      sio(resource::get_default(), size)
-{
-}
-
-      sio::sio(resource* resource, int size) noexcept:
       ios(),
-      m_resource(resource),
       m_data_head(nullptr),
       m_read_iter(nullptr),
       m_read_size(0),
@@ -42,12 +36,6 @@
 
       sio::sio(const char* text, int size) noexcept:
       sio()
-{
-      load(text, size);
-}
-
-      sio::sio(resource* resource, const char* text, int size) noexcept:
-      sio(resource)
 {
       load(text, size);
 }
@@ -73,7 +61,6 @@ void  sio::assign(const sio& copy) noexcept
 {
       if(this != std::addressof(copy)) {
           reset(false);
-          m_resource  = copy.m_resource;
           m_data_head = copy.m_data_head;
           m_read_iter = copy.m_read_iter;
           m_read_size = copy.m_read_size;
@@ -85,7 +72,6 @@ void  sio::assign(sio&& copy) noexcept
 {
       if(this != std::addressof(copy)) {
           reset(false);
-          m_resource  = copy.m_resource;
           m_data_head = copy.m_data_head;
           m_read_iter = copy.m_read_iter;
           m_read_size = copy.m_read_size;
@@ -333,48 +319,41 @@ bool  sio::reserve(int size) noexcept
       int   l_size_next = 0;
       int   l_size_prev = m_data_size;
       if(size > l_size_prev) {
-          if(m_resource->has_fixed_size()) {
-          // resource is static (a fixed block of memory has already been reserved for it)
-          // resizing within its limits will be essentially a no-op
-          // resizing outside its limits will tragically fail
-              l_size_next = m_resource->get_fixed_size();
-          } else
-          if(m_resource->has_variable_size()) {
           // resource allows realloc()
           // - if not previously allocated, simply alloc();
           // - if empty, don't realloc(), simply alloc() - that saves an expensive and
           //   unnecessary move operation with garbage data;
           // - proceed as normal otherwise
-              if(m_data_head == nullptr) {
-                  l_size_next = m_resource->get_alloc_size(size);
-              } else
-              if(m_read_size == 0) {
-                  l_size_next = m_resource->get_alloc_size(size);
-              } else
-              if(int l_size_exp = m_resource->get_alloc_size(size); l_size_exp <= std::numeric_limits<int>::max()) {
-                  auto  l_size_new = l_size_exp;
-                  auto  l_copy_ptr = reinterpret_cast<char*>(m_resource->reallocate(m_data_head, l_size_prev, l_size_exp, alignof(std::size_t)));
-                  if(l_copy_ptr) {
-                      l_data_head = m_data_head;
-                      m_data_head = l_copy_ptr;
-                      m_read_iter = m_data_head + (m_read_iter - l_data_head);
-                      m_data_size = l_size_new;
-                  } else
-                      return false;
+          if(m_data_head == nullptr) {
+              l_size_next = get_round_value(size, global::cache_small_max);
+          } else
+          if(m_read_size == 0) {
+              l_size_next = get_round_value(size, global::cache_small_max);
+          } else
+          if(int
+              l_size_exp = get_round_value(size, global::cache_small_max);
+              l_size_exp <= std::numeric_limits<int>::max()) {
+              auto  l_size_new = l_size_exp;
+              auto  l_copy_ptr = reinterpret_cast<char*>(realloc(m_data_head, l_size_exp));
+              if(l_copy_ptr) {
+                  l_data_head = m_data_head;
+                  m_data_head = l_copy_ptr;
+                  m_read_iter = m_data_head + (m_read_iter - l_data_head);
+                  m_data_size = l_size_new;
               } else
                   return false;
           } else
           if(m_data_head == nullptr) {
               // resource is neither static nor resizable - only the first allocation
               // succeeds
-              l_size_next = m_resource->get_alloc_size(size);
+              l_size_next = get_round_value(size, global::cache_small_max);
           } else
               return false;
 
           if(l_size_next > l_size_prev) {
               if(l_size_next <= std::numeric_limits<int>::max()) {
                   auto  l_size_new = l_size_next;
-                  auto  l_copy_ptr = reinterpret_cast<char*>(m_resource->allocate(l_size_next, alignof(std::size_t)));
+                  auto  l_copy_ptr = reinterpret_cast<char*>(malloc(l_size_next));
                   if(l_copy_ptr) {
                       l_data_head = m_data_head;
                       m_data_head = l_copy_ptr;
@@ -382,7 +361,7 @@ bool  sio::reserve(int size) noexcept
                       m_data_size = l_size_new;
                       if(m_data_head != l_data_head) {
                           if(l_data_head != nullptr) {
-                              m_resource->deallocate(l_data_head, l_size_prev, alignof(std::size_t));
+                              free(l_data_head);
                           }
                       }
                   } else
@@ -443,7 +422,7 @@ void  sio::clear() noexcept
 void  sio::reset(bool clear) noexcept
 {
       if(m_data_head) {
-          m_resource->deallocate(m_data_head, m_data_size, alignof(std::size_t));
+          free(m_data_head);
           m_data_head = nullptr;
           if(clear) {
               m_read_iter = nullptr;

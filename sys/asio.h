@@ -46,13 +46,6 @@ class asio: public Bt
           base_type::set_io(std::addressof(m_source));
   }
 
-  template<typename... Args>
-  inline  asio(resource* resource, Args&&... args) noexcept:
-          base_type(resource, nullptr),
-          m_source(std::forward<Args>(args)...) {
-          base_type::set_io(std::addressof(m_source));
-  }
-
   inline  asio(const asio& copy) noexcept:
           base_type(copy),
           m_source(copy.m_source) {

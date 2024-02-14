@@ -27,25 +27,15 @@
 #include <cstring>
 #include <cstdarg>
 
-template<typename At>
 class char_base
 {
   protected:
-  At            m_allocator;
-  char*         m_value;
-  unsigned int  m_size;
-  unsigned int  m_length;
+  char*               m_value;
+  unsigned short int  m_size;
+  unsigned short int  m_length;
 
   public:
   inline  char_base() noexcept:
-          m_allocator(),
-          m_value(nullptr),
-          m_size(0),
-          m_length(0) {
-  }
-
-  inline  char_base(const At& allocator) noexcept:
-          m_allocator(allocator),
           m_value(nullptr),
           m_size(0),
           m_length(0) {
@@ -60,11 +50,11 @@ class char_base
 /* char_ptr
    string class with variable size static buffer
 */
-template<size_t Size = global::cache_small_max, typename At = heap>
-class char_ptr: public char_base<At>
+template<size_t Size = 32, typename At = heap>
+class char_ptr: public char_base
 {
   //size of members
-  static constexpr size_t memb_size = sizeof(char_base<At>);
+  static constexpr size_t memb_size = sizeof(char_base);
 
   //structure size
   static constexpr size_t data_size = Size;
@@ -72,7 +62,7 @@ class char_ptr: public char_base<At>
   static_assert(data_size < std::numeric_limits<short int>::max(), "text_ptr requires Size smallar than 32768");
   static_assert(data_size > memb_size, "text_ptr requires Size larger than char_base");
 
-  using  base_type = char_base<At>;
+  using  base_type = char_base;
 
   public:
   static constexpr size_t text_size = data_size - memb_size;
@@ -102,7 +92,7 @@ class char_ptr: public char_base<At>
                       l_new_size += global::cache_small_max;
                   }
                   if(l_new_size < std::numeric_limits<unsigned int>::max()) {
-                      l_new_ptr = reinterpret_cast<char*>(base_type::m_allocator.allocate(l_new_size));
+                      l_new_ptr = reinterpret_cast<char*>(malloc(l_new_size));
                       if(l_new_ptr) {
                           dispose();
                           base_type::m_value = l_new_ptr;
@@ -119,7 +109,7 @@ class char_ptr: public char_base<At>
   inline  void dispose(bool reset = true) noexcept {
           if(base_type::m_value) {
               if(base_type::m_value != m_data) {
-                  base_type::m_allocator.deallocate(base_type::m_value, base_type::m_size);
+                  free(base_type::m_value);
               }
               if(reset) {
                   base_type::m_value = nullptr;
@@ -171,12 +161,8 @@ class char_ptr: public char_base<At>
           base_type() {
   }
 
-          char_ptr(const At& allocator) noexcept:
-          base_type(allocator) {
-  }
-
-  inline  char_ptr(const char* p, const At& allocator = At()) noexcept:
-          char_ptr(allocator) {
+  inline  char_ptr(const char* p) noexcept:
+          base_type() {
           reset(p);
   }
 

@@ -30,7 +30,6 @@
 class bio: public sys::ios
 {
   ios*          m_io;
-  resource*     m_resource;
 
   protected:
   char*         m_data_head;
@@ -52,7 +51,6 @@ class bio: public sys::ios
   public:
           bio() noexcept;
           bio(ios*) noexcept;
-          bio(resource*, ios*) noexcept;
           bio(const bio&) noexcept;
           bio(bio&&) noexcept;
   virtual ~bio();

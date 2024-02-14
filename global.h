@@ -48,7 +48,7 @@ constexpr std::size_t system_page_size = 4096u;
 #ifdef CACHE_SMALL_MAX
 constexpr int cache_small_max = CACHE_SMALL_MAX;
 #else
-constexpr int cache_small_max = 32;
+constexpr int cache_small_max = 16;
 #endif
 
 static_assert(cache_small_max >= 8, "small cache constant must be greater than 0 and should be at least 8.");
@@ -56,7 +56,7 @@ static_assert(cache_small_max >= 8, "small cache constant must be greater than 0
 #ifdef CACHE_LARGE_MAX
 constexpr int cache_large_max = CACHE_LARGE_MAX;
 #else
-constexpr int cache_large_max = cache_small_max * 8u;
+constexpr int cache_large_max = cache_small_max * 4u;
 #endif
 
 /*namespace global*/ }

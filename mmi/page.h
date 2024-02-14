@@ -21,20 +21,19 @@
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#include "pool_base.h"
+#include "page_base.h"
 
 namespace mmi {
 
 /* page
    memory page
-
-   Xt - data type
-   MapSize - map size (default: 0)
-   ArraySize - array size (default: 1)
-   Rt - resource type (default: heap)
+   Xt        - data type;
+   PageSize  - how many elements the page can contain
+   ArraySize - how many entries each element contains
+   EnableMap - enable bitmap for fast allocation
 */
-template<typename Xt, std::size_t MapSize, std::size_t ArraySize, typename Rt>
-class page: public pool_base<Xt, Rt, fixed>
+template<typename Xt, std::size_t MapSize, std::size_t ArraySize>
+class page: public page_base<Xt, Rt>
 {
   page*  m_prev;
   page*  m_next;
@@ -43,7 +42,7 @@ class page: public pool_base<Xt, Rt, fixed>
   static_assert(ArraySize > 0, "ArraySize must be greater than 0.");
 
   public:
-  using  base_type     = pool_base<Xt, Rt, fixed>;
+  using  base_type     = page_base<Xt, Rt, fixed>;
   using  node_type     = typename base_type::node_type;
   using  resource_type = typename base_type::resource_type;
 

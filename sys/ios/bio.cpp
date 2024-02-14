@@ -27,19 +27,13 @@
       constexpr long int s_read_max = std::numeric_limits<int>::max();
 
       bio::bio() noexcept:
-      bio(resource::get_default(), nullptr)
+      bio(nullptr)
 {
 }
 
       bio::bio(ios* io) noexcept:
-      bio(resource::get_default(), io)
-{
-}
-
-      bio::bio(resource* resource, ios* io) noexcept:
       ios(),
       m_io(nullptr),
-      m_resource(resource),
       m_data_head(nullptr),
       m_file_pos(-1),
       m_read_pos(-1),
@@ -58,7 +52,6 @@
       bio::bio(const bio& copy) noexcept:
       ios(copy),
       m_io(copy.m_io),
-      m_resource(nullptr),
       m_data_head(nullptr),
       m_file_pos(copy.m_file_pos),
       m_read_pos(copy.m_read_pos),
@@ -76,7 +69,6 @@
       bio::bio(bio&& copy) noexcept:
       ios(std::move(copy)),
       m_io(std::move(copy.m_io)),
-      m_resource(std::move(copy.m_resource)),
       m_data_head(copy.m_data_head),
       m_file_pos(copy.m_file_pos),
       m_read_pos(copy.m_read_pos),
@@ -663,49 +655,38 @@ bool  bio::reserve(int size) noexcept
       int   l_size_next = 0;
       int   l_size_prev = m_data_tail - m_data_head;
       if(size > l_size_prev) {
-          if(m_resource->has_fixed_size()) {
-          // resource is static (a fixed block of memory has already been reserved for it)
-          // resizing within its limits will be essentially a no-op
-          // resizing outside its limits will tragically fail
-              l_size_next = m_resource->get_fixed_size();
-          } else
-          if(m_resource->has_variable_size()) {
           // resource allows realloc()
           // - if not previously allocated, simply alloc();
           // - if empty, don't realloc(), simply alloc() - that saves an expensive and
           //   unnecessary move operation with garbage data;
           // - proceed as normal otherwise
-              if(m_data_head == nullptr) {
-                  l_size_next = m_resource->get_alloc_size(size);
-              } else
-              if(m_read_size == 0) {
-                  l_size_next = m_resource->get_alloc_size(size);
-              } else
-              if(m_lock_ctr == 0) {
-                  if(int l_size_exp = m_resource->get_alloc_size(size); l_size_exp <= std::numeric_limits<int>::max()) {
-                      auto l_size_new = l_size_exp;
-                      auto l_copy_ptr = reinterpret_cast<char*>(m_resource->reallocate(m_data_head, l_size_prev, l_size_exp, alignof(std::size_t)));
-                      if(l_copy_ptr) {
-                          l_data_head = m_data_head;
-                          m_data_head = l_copy_ptr;
-                          m_data_tail = l_copy_ptr + l_size_new;
-                      } else
-                          return false;
+          if(m_data_head == nullptr) {
+              l_size_next = get_round_value(size, global::cache_small_max);
+          } else
+          if(m_read_size == 0) {
+              l_size_next = get_round_value(size, global::cache_small_max);
+          } else
+          if(m_lock_ctr == 0) {
+              if(int
+                  l_size_exp = get_round_value(size, global::cache_small_max);
+                  l_size_exp <= std::numeric_limits<int>::max()) {
+                  auto l_size_new = l_size_exp;
+                  auto l_copy_ptr = reinterpret_cast<char*>(realloc(m_data_head, l_size_exp));
+                  if(l_copy_ptr) {
+                      l_data_head = m_data_head;
+                      m_data_head = l_copy_ptr;
+                      m_data_tail = l_copy_ptr + l_size_new;
                   } else
                       return false;
               } else
                   return false;
-          } else
-          if(m_data_head == nullptr) {
-          // resource is neither static nor resizable - only the first allocation succeeds
-              l_size_next = m_resource->get_alloc_size(size);
           } else
               return false;
 
           if(l_size_next > l_size_prev) {
               if(l_size_next <= std::numeric_limits<int>::max()) {
                   auto  l_size_new = l_size_next;
-                  auto  l_copy_ptr = reinterpret_cast<char*>(m_resource->allocate(l_size_next, alignof(std::size_t)));
+                  auto  l_copy_ptr = reinterpret_cast<char*>(malloc(l_size_next));
                   if(l_copy_ptr) {
                       l_data_head = m_data_head;
                       m_data_head = l_copy_ptr;
@@ -718,7 +699,7 @@ bool  bio::reserve(int size) noexcept
                               if(m_save_size) {
                                   std::memcpy(m_data_head, l_data_head, m_save_size);
                               }
-                              m_resource->deallocate(l_data_head, l_size_prev, alignof(std::size_t));
+                              free(l_data_head);
                           }
                       }
                   } else
@@ -736,7 +717,7 @@ void  bio::reset(bool clear) noexcept
           if(m_commit_bit) {
               flush();
           }
-          m_resource->deallocate(m_data_head, m_data_tail - m_data_head);
+          free(m_data_head);
       }
       if(clear) {
           release();
@@ -746,7 +727,6 @@ void  bio::reset(bool clear) noexcept
 void  bio::release() noexcept
 {
       m_io         = nullptr;
-      m_resource   = nullptr;
       m_data_head  = nullptr;
       m_file_pos   =-1;
       m_read_pos   =-1;
@@ -794,7 +774,6 @@ bio&  bio::operator=(bio&& rhs) noexcept
       if(std::addressof(rhs) != this) {
           reset(false);
           m_io         = rhs.m_io;
-          m_resource   = rhs.m_resource;
           m_data_head  = rhs.m_data_head;
           m_file_pos   = rhs.m_file_pos;
           m_read_pos   = rhs.m_read_pos;

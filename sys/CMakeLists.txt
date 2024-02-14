@@ -11,7 +11,6 @@ set(inc
   arg.h argv.h var.h fmt.h descriptor.h process.h ios.h asio.h
 )
 
-add_subdirectory(adt)
 add_subdirectory(ios)
 
 if(SDK)

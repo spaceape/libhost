@@ -48,17 +48,17 @@ class place
       (std::is_trivially_destructible<node_type>::value == false);
 
   private:
-  node_type*  m_object;
+  node_type*  p_object;
   char        m_data[sizeof(Xt)];
 
   public:
   inline  place() noexcept:
-          m_object(nullptr) {
+          p_object(nullptr) {
   }
 
   template<typename... Args>
   inline  place(Args&&... args) noexcept:
-          m_object(nullptr) {
+          p_object(nullptr) {
           emplace(std::forward<Args>(args)...);
   }
 
@@ -80,62 +80,62 @@ class place
   inline  node_type* emplace(Args&&... args) noexcept {
           if constexpr (is_node_constructible) {
               reset();
-              m_object = new(m_data) node_type(std::forward<Args>(args)...);
+              p_object = new(std::addressof(m_data)) node_type(std::forward<Args>(args)...);
           }
-          return m_object;
+          return p_object;
   }
 
   inline  node_type* emplace(const node_type& copy) noexcept {
           if constexpr (is_node_constructible) {
-              if(m_object) {
-                  m_object->operator=(copy);
+              if(p_object) {
+                  p_object->operator=(copy);
               } else
-                  m_object = new(m_data) node_type(copy);
+                  p_object = new(m_data) node_type(copy);
           }
-          return m_object;
+          return p_object;
   }
 
   inline  node_type* emplace(node_type&& copy) noexcept {
           if constexpr (is_node_constructible) {
-              if(m_object) {
-                  m_object->operator=(std::move(copy));
+              if(p_object) {
+                  p_object->operator=(std::move(copy));
               } else
-                  m_object = new(m_data) node_type(std::move(copy));
+                  p_object = new(m_data) node_type(std::move(copy));
           }
-          return m_object;
+          return p_object;
   }
 
   inline  node_type* reset() noexcept {
           if constexpr (is_node_destructible) {
-              if(m_object) {
-                  m_object->~node_type();
+              if(p_object) {
+                  p_object->~node_type();
               }
           }
-          return m_object = nullptr;
+          return p_object = nullptr;
   }
   
   inline  node_type*  get() noexcept {
-          return m_object;
+          return p_object;
   }
 
   inline  bool is_set() const noexcept {
-          return m_object != nullptr;
+          return p_object != nullptr;
   }
 
   inline  bool is_empty() const noexcept {
-          return m_object == nullptr;
+          return p_object == nullptr;
   }
   
   inline  operator node_type&() noexcept {
-          return *m_object;
+          return *p_object;
   }
 
   inline  operator node_type*() noexcept {
-          return m_object;
+          return p_object;
   }
 
   inline  node_type* operator->() noexcept {
-          return m_object;
+          return p_object;
   }
 
   inline  place& operator=(const place& rhs) noexcept {

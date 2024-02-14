@@ -29,8 +29,6 @@
 */
 class sio: public sys::ios
 {
-  resource* m_resource;
-
   protected:
   char*   m_data_head;
   char*   m_read_iter;
@@ -43,9 +41,7 @@ class sio: public sys::ios
 
   public:
           sio(int = 0) noexcept;
-          sio(resource*, int = 0) noexcept;
           sio(const char*, int = 0) noexcept;
-          sio(resource*, const char*, int = 0) noexcept;
           sio(const sio&) noexcept;
           sio(sio&&) noexcept;
   virtual ~sio();

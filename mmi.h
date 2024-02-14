@@ -23,23 +23,7 @@
 **/
 #include "global.h"
 #include "none.h"
-#include "mmi/manager/heap.h"
-#include <mmi/resource.h>
 
 namespace mmi {
-
-
-template<typename Xt, typename Rt = heap, typename Pt = none>
-class pool_base;
-
-template<typename Xt, typename Rt = heap>
-class pool;
-
-template<typename Xt, std::size_t MapSize = 0, std::size_t ArraySize = 1, typename Rt = heap>
-class page;
-
-template<typename Xt, std::size_t PageSize = 256, std::size_t ArraySize = 1, typename Rt = heap>
-class bank;
-
 /*namespace mmi*/ }
 #endif

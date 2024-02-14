@@ -23,7 +23,6 @@
 **/
 #include "global.h"
 #include <mmi.h>
-#include "sys/adt.h"
 #include "sys/ios.h"
 
 constexpr char EOL ='\n';
@@ -73,5 +72,5 @@ constexpr int SEEK_CUR = 1;
 constexpr int SEEK_END = 2;
 #endif 
 
-constexpr unsigned int pin_none = 256;
+constexpr unsigned int pin_none = 255;
 #endif

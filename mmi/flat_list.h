@@ -21,15 +21,14 @@
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#include <mmi.h>
 #include <vector>
 
 namespace mmi {
 
 template<typename Xt>
-class flat_list: public std::pmr::vector<Xt>
+class flat_list: public std::vector<Xt>
 {
-  using  base_type = typename std::pmr::vector<Xt>;
+  using  base_type = typename std::vector<Xt>;
 
   public:
   using  node_type = typename std::remove_cv<Xt>::type;
@@ -43,12 +42,7 @@ class flat_list: public std::pmr::vector<Xt>
   static constexpr size_t elements_max = 0;
 
   public:
-  inline  flat_list(std::pmr::memory_resource* r = resource::get_default()) noexcept:
-          base_type(r) {
-  }
-
-  inline  flat_list(std::pmr::memory_resource* r, size_t reserve) noexcept:
-          base_type(r) {
+  inline  flat_list(size_t reserve) noexcept {
           base_type::reserve(reserve);
   }
 

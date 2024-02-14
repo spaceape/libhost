@@ -95,7 +95,7 @@ struct flat_map_traits
     }
   };
 
-  using  base_type = std::pmr::vector<node_type>;
+  using  base_type = std::vector<node_type>;
   using  iterator_type = typename base_type::iterator;
 };
 

@@ -125,21 +125,21 @@ struct convert<char*>
                   l_value *= 16;
               } else
                   break;
-              if((*i_char >= '0') || (*i_char <= '9')) {
+              if((*i_char >= '0') && (*i_char <= '9')) {
                   l_digit = *i_char - '0';
                   if(l_value <= l_msd - l_digit) {
                       l_value += l_digit;
                   } else
                       break;
               } else
-              if((*i_char >= 'A') || (*i_char <= 'F')) {
+              if((*i_char >= 'A') && (*i_char <= 'F')) {
                   l_digit = *i_char - 'A' + 10;
                   if(l_value <= l_msd - l_digit) {
                       l_value += l_digit;
                   } else
                       break;
               } else
-              if((*i_char >= 'a') || (*i_char <= 'f')) {
+              if((*i_char >= 'a') && (*i_char <= 'f')) {
                   l_digit = *i_char - 'a' + 10;
                   if(l_value <= l_msd - l_digit) {
                       l_value += l_digit;
@@ -149,7 +149,9 @@ struct convert<char*>
                   break;
               ++i_char;
           }
-          if(int l_length = i_char - source; l_length > 0) {
+          if(int
+              l_length = i_char - source;
+              l_length > 0) {
               value = l_value;
               return  l_length;
           }

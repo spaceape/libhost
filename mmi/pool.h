@@ -21,7 +21,7 @@
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#include "pool_base.h"
+#include "page_base.h"
 #include <cstdarg>
 #include <cstring>
 
@@ -29,27 +29,25 @@ namespace mmi {
 
 /* pool
    memory pool
-   Xt - data type
-   Rt - resource type (default: heap)
+   Xt        - data type;
+   PageSize  - how many elements the page can contain
+   ArraySize - how many entries each element contains
+   EnableMap - enable bitmap for fast allocation
 */
-template<typename Xt, typename Rt>
-class pool: public pool_base<Xt, Rt>
+template<typename Xt, std::size_t PageSize, std::size_t ArraySize = 1, bool EnableMap = false>
+class pool: public page_base<Xt, PageSize, ArraySize, EnableMap>
 {
   public:
-  using  base_type     = pool_base<Xt, Rt>;
-  using  node_type     = typename base_type::node_type;
-  using  resource_type = typename base_type::resource_type;
+  using  base_type = page_base<Xt, PageSize, ArraySize, EnableMap>;
+  using  node_type = typename base_type::node_type;
 
   public:
   inline  pool() noexcept:
           base_type() {
   }
 
-  inline  pool(const resource_type& resource) noexcept:
-          base_type(resource) {
-  }
-
           pool(const pool& copy) noexcept = delete;
+
           pool(pool&& copy) noexcept = delete;
 
   inline  node_type*  at(off_t index) const noexcept {
@@ -92,122 +90,6 @@ class pool: public pool_base<Xt, Rt>
 
   inline  void clear() noexcept {
           base_type::clear();
-  }
-
-          pool& operator=(const pool&) noexcept = delete;
-          pool& operator=(pool&&) noexcept = delete;
-};
-
-/* pool<char>
-   memory pool specialization for char
-*/
-template<typename Rt>
-class pool<char, Rt>: public pool_base<char, Rt>
-{
-  public:
-  using  base_type     = pool_base<char, Rt>;
-  using  node_type     = typename base_type::node_type;
-  using  resource_type = typename base_type::resource_type;
-
-  public:
-  inline  pool() noexcept:
-          base_type() {
-  }
-
-  inline  pool(const resource_type& resource) noexcept:
-          base_type(resource) {
-  }
-
-  inline  pool(std::size_t size_min, std::size_t size_max, std::size_t size_alloc = global::cache_large_max) noexcept:
-          base_type(size_min, size_max, size_alloc) {
-  }
-
-  inline  pool(const resource_type& resource, std::size_t size_min, std::size_t size_max, std::size_t size_alloc = global::cache_large_max) noexcept:
-          base_type(resource, size_min, size_max, size_alloc) {
-  }
-
-          pool(const pool& copy) noexcept = delete;
-          pool(pool&& copy) noexcept = delete;
-
-  inline  auto   save() const noexcept -> std::size_t {
-          return base_type::m_tail - base_type::m_head;
-  }
-
-  inline  void   save(std::size_t& offset) const noexcept {
-          offset = save();
-  }
-
-  inline  char*  ptr_get(const char* src, std::size_t length = 0) noexcept {
-          auto   l_offset = base_type::get_tail_pos();
-          if(src) {
-              if(src[0]) {
-                  if(length == 0) {
-                      length = std::strlen(src);
-                  }
-                  base_type::raw_get_array(length + 1);
-                  if(char* l_dst = base_type::at(l_offset); l_dst != nullptr) {
-                      std::strncpy(l_dst, src, length + 1);
-                  }
-                  base_type::raw_unget(1);
-              }
-          }
-          return base_type::at(l_offset);
-  }
-
-  inline  char*  raw_get(std::size_t count) noexcept {
-          return base_type::raw_get_array(count);
-  }
-  
-  inline  char*  ptr_fmt_v(const char* fmt, va_list va) noexcept {
-          va_list l_vc;
-          int     l_length;
-          auto    l_offset = base_type::get_tail_pos();
-          if(fmt) {
-              va_copy(l_vc, va);
-              l_length = std::vsnprintf(nullptr, 0, fmt, va);
-              if(l_length) {
-                  base_type::raw_get_array(l_length + 1);
-                  if(char* l_dst = base_type::at(l_offset); l_dst != nullptr) {
-                      std::vsnprintf(l_dst, l_length + 1, fmt, l_vc);
-                  }
-                  base_type::raw_unget(1);
-              }
-              va_end(l_vc);
-          }
-          return base_type::at(l_offset);
-  }
-
-  inline  char*  ptr_fmt(const char* fmt, ...) noexcept {
-          char*   l_result;
-          va_list l_va;
-          va_start(l_va, fmt);
-          l_result = ptr_fmt_v(fmt, l_va);
-          va_end(l_va);
-          return  l_result;
-  }
-
-  inline  char*  raw_unget(std::size_t count) noexcept {
-          return base_type::raw_unget(count);
-  }
-  
-  inline  char*  ptr_unget(std::size_t count) noexcept {
-          return base_type::raw_unget(count);
-  }
-
-  inline  auto   get_length(std::size_t offset) const noexcept {
-          return base_type::get_tail_pos() - offset;
-  }
-
-  inline  char*  restore(std::size_t offset) noexcept {
-          auto   l_unwind = get_length(offset);
-          if(l_unwind) {
-              base_type::raw_unget(l_unwind);
-          }
-          return base_type::at(offset);
-  }
-
-  inline  bool   reserve(std::size_t count) noexcept {
-          return base_type::reserve(count);
   }
 
           pool& operator=(const pool&) noexcept = delete;

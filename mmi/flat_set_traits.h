@@ -29,7 +29,7 @@ template<typename Xt>
 struct flat_set_traits
 {
   using  node_type     = typename std::remove_cv<Xt>::type;
-  using  base_type     = std::pmr::vector<node_type>;
+  using  base_type     = std::vector<node_type>;
   using  iterator_type = typename base_type::iterator;
 };
 

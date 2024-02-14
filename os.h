@@ -49,6 +49,6 @@ constexpr int   memory_page_size = 256;
 constexpr int   filesystem_block_size = 512;
 #endif
 
-
 /*namespace os*/ }
+
 #endif
