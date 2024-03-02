@@ -35,7 +35,8 @@ class pool
   static_assert(Size < std::numeric_limits<int>::max(), "pool can reserve at most INT_MAX queues");
 
   public:
-  using queue_type    = queue<Xt, Ct>;
+  using                 queue_type = queue<Xt, Ct>;
+  static constexpr int  queue_size = Size; 
 
   private:
   int         m_queue_index;
@@ -71,15 +72,14 @@ class pool
           return m_queue_list[index];
   }
 
-  // template<typename... Args>
-  // inline  bool schedule(std::enable_if_t<Policy == pxe_policy_explicit, int> i, Args&&... args) noexcept {
-  //         if(i >= 0) {
-  //             if(i < m_queue_count) {
-  //                 return m_queue_list[i].schedule(std::forward<Args>(args)...);
-  //             }
-  //         }
-  //         return false;
-  // }
+  template<typename... Args>
+  inline  bool schedule_explicit(int index, Args&&... args) noexcept {
+          if((index >= 0) &&
+              (index < Size)) {
+              return m_queue_list[index].schedule(std::forward<Args>(args)...);
+          }
+          return false;
+  }
 
   template<typename... Args>
   inline  bool schedule(Args&&... args) noexcept {

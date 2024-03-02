@@ -27,6 +27,57 @@
 
 namespace fmt {
 
+class s
+{
+  char  m_text[32];
+  int   m_width;
+  int   m_length;
+  
+  public:
+  explicit s(const char* value, int width = 31, int padding = ' ') noexcept {
+          m_width = width;
+          m_length = std::strlen(value);
+          if(m_width > static_cast<int>(sizeof(m_text)) - 1) {
+              m_width = static_cast<int>(sizeof(m_text)) - 1;
+          }
+          std::strncpy(m_text, value, m_width);
+          if(m_length >= m_width) {
+              m_length = m_width;
+          } else
+          if(m_length < m_width) {
+              std::memset(m_text + m_length, padding, m_width - m_length);
+          }
+          m_text[m_width] = 0;
+  }
+
+  inline  s(const s& copy) noexcept {
+          std::memcpy(m_text, copy.m_text, sizeof(m_text));
+  }
+  
+  inline  s(s&& copy) noexcept:
+          s(copy) {
+          copy.m_text[0] = 0;
+  }
+  
+  inline  ~s() {
+  }
+  
+  inline  operator const char*() const noexcept {
+          return m_text;
+  }
+  
+  inline  s& operator=(const s& rhs) noexcept {
+          std::memcpy(m_text, rhs.m_text, sizeof(m_text));
+          return *this;
+  }
+
+  inline  s& operator=(s&& rhs) noexcept {
+          std::memcpy(m_text, rhs.m_text, sizeof(m_text));
+          rhs.m_text[0] = 0;
+          return *this;
+  }
+};
+
 class d
 {
   char  m_text[32];
@@ -112,19 +163,17 @@ class d
   }
 };
 
-/* format x
-*/
 class x
 {
   char  m_text[20];
   
   public:
   template<typename Xt>
-  explicit  x(Xt value, std::size_t width = sizeof(Xt)) noexcept {
+  explicit  x(Xt value, std::size_t width = sizeof(Xt) * 2) noexcept {
           int   l_digit;
           int   l_offset;
           int   l_length = 0;
-          int   l_count  = 2 * width;
+          int   l_count  = width;
           auto& l_value  = value;
           if constexpr (os::is_lsb) {
               l_offset = sizeof(m_text) - 1;
@@ -201,19 +250,17 @@ class x
   }
 };
 
-/* format X
-*/
 class X
 {
   char  m_text[20];
   
   public:
   template<typename Xt>
-  explicit X(Xt value, std::size_t width = sizeof(Xt)) noexcept {
+  explicit X(Xt value, std::size_t width = sizeof(Xt) * 2) noexcept {
           int   l_digit;
           int   l_offset;
           int   l_length = 0;
-          int   l_count  = 2 * width;
+          int   l_count  = width;
           auto& l_value  = value;
           if constexpr (os::is_lsb) {
               l_offset = sizeof(m_text) - 1;

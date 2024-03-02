@@ -181,7 +181,7 @@ class consumer<Xt, std::thread>: public producer<Xt, std::thread>
           m_busy       = true;
           m_live_index = 0;
 
-          printdbg("--- queue %p loop enter", this);
+          printdbg("[queue:@%p] loop enter", this);
           do {
               if(m_live_index < static_cast<int>(base_type::m_task_list.size())) {
                   // run through the list of tasks and execute them in the order they are stored
@@ -236,7 +236,7 @@ class consumer<Xt, std::thread>: public producer<Xt, std::thread>
           while(m_busy);
           m_wake = false;
           m_busy = false;
-          printdbg("--- queue %p loop leave", this);
+          printdbg("[queue:@%p] loop leave", this);
   }
 
   protected:

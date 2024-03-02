@@ -38,10 +38,9 @@ class bank: public page<Xt, get_div_ub(PageSize, 8), ArraySize, Rt>
   static_assert(PageSize > 0, "PageSize of 0 is useless.");
 
   public:
-  using  page_type     = page<Xt, get_div_ub(PageSize, 8), ArraySize, Rt>;
-  using  base_type     = page_type;
-  using  node_type     = typename base_type::node_type;
-  using  resource_type = typename base_type::resource_type;
+  using  page_type = page<Xt, get_div_ub(PageSize, 8), ArraySize, Rt>;
+  using  base_type = page_type;
+  using  node_type = typename base_type::node_type;
 
   private:
   page_type*    m_page_iter;
@@ -49,13 +48,9 @@ class bank: public page<Xt, get_div_ub(PageSize, 8), ArraySize, Rt>
   unsigned int  m_page_count;
   unsigned int  m_page_max;
 
-  public:
+  public:  
   inline  bank() noexcept:
-          bank(resource_type()) {
-  }
-  
-  inline  bank(const resource_type& resource) noexcept:
-          base_type(resource, PageSize, std::numeric_limits<unsigned int>::max()),
+          base_type(PageSize, std::numeric_limits<unsigned int>::max()),
           m_page_iter(this),
           m_page_pos(nullptr),
           m_page_count(1),

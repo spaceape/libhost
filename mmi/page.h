@@ -237,12 +237,8 @@ class page: public pool_base<Xt, Rt, fixed>
   inline  page() noexcept {
   }
 
-  inline  page(
-            const resource_type& resource,
-            std::size_t  e_min = 0,
-            std::size_t  e_max = std::numeric_limits<unsigned int>::max()
-          ) noexcept:
-          base_type(resource, get_min_alloc(e_min * array_size), get_max_alloc(e_max * array_size)),
+  inline  page(std::size_t  e_min = 0, std::size_t  e_max = std::numeric_limits<unsigned int>::max()) noexcept:
+          base_type(get_min_alloc(e_min * array_size), get_max_alloc(e_max * array_size)),
           m_prev(nullptr),
           m_next(nullptr) {
           if constexpr (map_size > 0) {

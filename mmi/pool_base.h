@@ -39,8 +39,8 @@ class pool_base
 {
   public:
   using  node_type     = typename std::remove_cv<Xt>::type;
-  using  resource_type = typename std::remove_cv<Rt>::type;
   using  policy_type   = typename std::remove_cv<Pt>::type;
+  using  resource_type = typename std::remove_cv<Rt>::type;
 
   static constexpr std::size_t node_size = sizeof(node_type);
 
@@ -132,21 +132,21 @@ class pool_base
           std::size_t l_size_prev = m_size;
           if(size > l_size_prev) {
               if constexpr (is_resource_static) {
-              // resource is static (a fixed block of memory has already been reserved for it)
-              // resizing within its limits will be essentially a no-op
-              // resizing outside its limits will tragically fail
+                  // resource is static (a fixed block of memory has already been reserved for it)
+                  // resizing within its limits will be essentially a no-op
+                  // resizing outside its limits will tragically fail
                   l_size_next = get_fixed_size<resource_type, node_type>();
               } else
               if constexpr (is_resource_resizable) {
-              // resource allows realloc()
-              // if the nodes are constructible c++ objects, reallocation is *not* performed
-              // directly (violates the c++ principles), but instead replaced by a new
-              // allocation, followed by a move.
-              // otherwise, for primitive types and pure data nodes realloc() works as follows:
-              // - if not previously allocated, simply alloc();
-              // - if empty, don't realloc(), simply alloc() - that saves an expensive and
-              //   unnecessary move operation with garbage data;
-              // - proceed as normal otherwise
+                  // resource allows realloc()
+                  // if the nodes are constructible c++ objects, reallocation is *not* performed
+                  // directly (violates the c++ principles), but instead replaced by a new
+                  // allocation, followed by a move.
+                  // otherwise, for primitive types and pure data nodes realloc() works as follows:
+                  // - if not previously allocated, simply alloc();
+                  // - if empty, don't realloc(), simply alloc() - that saves an expensive and
+                  //   unnecessary move operation with garbage data;
+                  // - proceed as normal otherwise
                   if constexpr (is_node_constructible) {
                       l_size_next = get_alloc_size<resource_type, node_type>(size);
                   } else
@@ -173,7 +173,7 @@ class pool_base
                       return nullptr;
               } else
               if(m_base == nullptr) {
-              // resource is neither static nor resizable - only the first allocation succeeds
+                  // resource is neither static nor resizable - only the first allocation succeeds
                   l_size_next = get_alloc_size<resource_type, node_type>(size);
               } else
                   return nullptr;
@@ -327,16 +327,8 @@ class pool_base
   }
 
   public:
-  /**/    pool_base() noexcept:
-          pool_base(resource_type()) {
-  }
-
-    /**/  pool_base(
-            const resource_type& resource,
-            std::size_t  e_min = 0,
-            std::size_t  e_max = std::numeric_limits<unsigned int>::max()
-          ) noexcept:
-          m_resource(resource),
+  /**/    pool_base(std::size_t e_min = 0u, std::size_t e_max = std::numeric_limits<unsigned int>::max()) noexcept:
+          m_resource(),
           m_policy(),
           m_align(alignof(node_type)),
           m_size(0),

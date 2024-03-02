@@ -38,15 +38,10 @@ class pool: public pool_base<Xt, Rt>
   public:
   using  base_type     = pool_base<Xt, Rt>;
   using  node_type     = typename base_type::node_type;
-  using  resource_type = typename base_type::resource_type;
 
   public:
   inline  pool() noexcept:
           base_type() {
-  }
-
-  inline  pool(const resource_type& resource) noexcept:
-          base_type(resource) {
   }
 
           pool(const pool& copy) noexcept = delete;
@@ -107,23 +102,14 @@ class pool<char, Rt>: public pool_base<char, Rt>
   public:
   using  base_type     = pool_base<char, Rt>;
   using  node_type     = typename base_type::node_type;
-  using  resource_type = typename base_type::resource_type;
 
   public:
   inline  pool() noexcept:
           base_type() {
   }
 
-  inline  pool(const resource_type& resource) noexcept:
-          base_type(resource) {
-  }
-
   inline  pool(std::size_t size_min, std::size_t size_max, std::size_t size_alloc = global::cache_large_max) noexcept:
           base_type(size_min, size_max, size_alloc) {
-  }
-
-  inline  pool(const resource_type& resource, std::size_t size_min, std::size_t size_max, std::size_t size_alloc = global::cache_large_max) noexcept:
-          base_type(resource, size_min, size_max, size_alloc) {
   }
 
           pool(const pool& copy) noexcept = delete;
