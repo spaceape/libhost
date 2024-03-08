@@ -23,14 +23,17 @@
 **/
 #include "global.h"
 #include <cstring>
-#include <openssl/md5.h>
+#include <openssl/evp.h>
 
 class md5_digest
 {
-  MD5_CTX m_ctx;
+  EVP_MD_CTX*   m_ctx;
+  unsigned int  m_length;
 
   public:
-  inline  md5_digest() noexcept {
+  inline  md5_digest() noexcept:
+          m_ctx(nullptr),
+          m_length(EVP_MD_size(EVP_md5())) {
           reset();
   }
   
@@ -44,25 +47,26 @@ class md5_digest
           md5_digest(md5_digest&& copy) noexcept = delete;
 
   inline  ~md5_digest() {
+          EVP_MD_CTX_free(m_ctx);
   }
 
   inline  void  hash() noexcept {
   }
 
   inline  void  hash(const char* bytes, int length) noexcept {
-          MD5_Update(std::addressof(m_ctx), bytes, length);
+          EVP_DigestUpdate(m_ctx, bytes, length);
   }
 
   inline  void  hash(const std::uint8_t* bytes, int length) noexcept {
-          MD5_Update(std::addressof(m_ctx), bytes, length);
+          EVP_DigestUpdate(m_ctx, bytes, length);
   }
 
   inline  void  hash(const char* string) noexcept {
-          MD5_Update(std::addressof(m_ctx), string, std::strlen(string));
+          EVP_DigestUpdate(m_ctx, string, std::strlen(string));
   }
   
   inline  void  hash(const std::string& string) noexcept {
-          MD5_Update(std::addressof(m_ctx), string.c_str(), string.length());
+          EVP_DigestUpdate(m_ctx, string.c_str(), string.length());
   }
   
   inline  void  hash(void* object) noexcept {
@@ -85,11 +89,11 @@ class md5_digest
   }
 
   inline  void  reset() noexcept {
-          MD5_Init(std::addressof(m_ctx));
+          EVP_DigestInit_ex(m_ctx, EVP_md5(), nullptr);
   }
 
   inline  void  copy(std::uint8_t* hash) noexcept {
-          MD5_Final(hash, std::addressof(m_ctx));
+          EVP_DigestFinal_ex(m_ctx, hash, std::addressof(m_length));
   }
 
           md5_digest& operator=(const md5_digest& rhs) noexcept = delete;
