@@ -205,11 +205,11 @@ class md5
           return compare(rhs) != 0;
   }
 
-  inline  bool  operator==(nullptr_t) const noexcept {
+  inline  bool  operator==(std::nullptr_t) const noexcept {
           return get_zero() == true;
   }
 
-  inline  bool  operator!=(nullptr_t) const noexcept {
+  inline  bool  operator!=(std::nullptr_t) const noexcept {
           return get_zero() == false;
   }
 

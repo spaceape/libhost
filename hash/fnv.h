@@ -65,7 +65,7 @@ template<typename Ht = std::uint32_t>
 class fnv
 {
   public:
-  using hash_type                 = hash_traits<Ht>::value_type;
+  using hash_type                 = typename hash_traits<Ht>::value_type;
   static constexpr int hash_size  = hash_traits<Ht>::size;
   
   private:

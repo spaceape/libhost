@@ -425,7 +425,7 @@ class p
   inline  ~p() {
   }
   
-  inline  operator char*() const noexcept {
+  inline  operator const char*() const noexcept {
           return m_text;
   }
   
