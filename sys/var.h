@@ -32,18 +32,18 @@ namespace sys {
 const char* get_environment_variable(const char*) noexcept;
 const char* set_environment_variable(const char*, const char*) noexcept;
 
-template<typename Xt, std::size_t NameSize, std::size_t DataSize, typename At>
+template<typename Xt, std::size_t NameSize, std::size_t DataSize>
 class var
 {
   using value_type = typename std::remove_cv<Xt>::type;
 
-  char_ptr<NameSize, At>  m_name;
-  value_type              m_value;
-  bool                    m_defined;
+  char_ptr<NameSize>  m_name;
+  value_type          m_value;
+  bool                m_defined;
 
   public:
-          var(const char* name, const At& allocator = std::pmr::get_default_resource()) noexcept:
-          m_name(name, allocator),
+          var(const char* name) noexcept:
+          m_name(name),
           m_value(),
           m_defined(false) {
   }
@@ -97,17 +97,17 @@ class var
   }
 };
 
-template<std::size_t NameSize, std::size_t DataSize, typename At>
-class var<char*, NameSize, DataSize, At>
+template<std::size_t NameSize, std::size_t DataSize>
+class var<char*, NameSize, DataSize>
 {
-  char_ptr<NameSize, At>  m_name;
-  char_ptr<DataSize, At>  m_data;
-  bool                    m_defined;
+  char_ptr<NameSize>  m_name;
+  char_ptr<DataSize>  m_data;
+  bool                m_defined;
 
   public:
-          var(const char* name, const At& allocator = std::pmr::get_default_resource()) noexcept:
-          m_name(name, allocator),
-          m_data(allocator),
+          var(const char* name) noexcept:
+          m_name(name),
+          m_data(),
           m_defined(false) {
   }
 
@@ -172,16 +172,16 @@ class var<char*, NameSize, DataSize, At>
   }
 };
 
-template<typename Xt, std::size_t NameSize, typename At>
-class var<Xt, NameSize, 0, At>
+template<typename Xt, std::size_t NameSize>
+class var<Xt, NameSize, 0>
 {
   using value_type = typename std::remove_cv<Xt>::type;
 
-  char_ptr<NameSize, At>  m_name;
+  char_ptr<NameSize> m_name;
 
   public:
-          var(const char* name, const At& allocator = std::pmr::get_default_resource()) noexcept:
-          m_name(name, allocator) {
+          var(const char* name) noexcept:
+          m_name(name) {
   }
 
           var(const var& copy) noexcept:
@@ -218,14 +218,14 @@ class var<Xt, NameSize, 0, At>
   }
 };
 
-template<std::size_t NameSize, typename At>
-class var<char*, NameSize, 0, At>
+template<std::size_t NameSize>
+class var<char*, NameSize, 0>
 {
-  char_ptr<NameSize, At>  m_name;
+  char_ptr<NameSize>  m_name;
 
   public:
-          var(const char* name, const At& allocator = std::pmr::get_default_resource()) noexcept:
-          m_name(name, allocator) {
+          var(const char* name) noexcept:
+          m_name(name) {
   }
 
           var(const var& copy) noexcept:

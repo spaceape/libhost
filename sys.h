@@ -58,7 +58,7 @@ using fio = ::fio;
 using bio = ::bio;
 using pio = ::pio;
 
-template<typename Xt, std::size_t, std::size_t = 0, typename = std::pmr::polymorphic_allocator<char>>
+template<typename Xt, std::size_t, std::size_t = 0>
 class var;
 
 class descriptor;
