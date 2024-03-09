@@ -21,21 +21,22 @@
 **/
 #include "error.h"
 #include "log.h"
+#include <cstdio>
 
 std::nullptr_t error(unsigned int code, const char* format, const char* file, int line, ...) noexcept
 {
       va_list va;
-      fprintf(stderr, "-!- Error %d:", code);
+      std::fprintf(stderr, "-!- Error %d:", code);
       if(format &&
           format[0]) {
           va_start(va, line);
-          vfprintf(stderr, format, va);
+          std::vfprintf(stderr, format, va);
           va_end(va);
-          fprintf(stderr, "\n");
+          std::fprintf(stderr, "\n");
       } else
-          fprintf(stderr, "Obscure internal failure.\n");
+          std::fprintf(stderr, "Obscure internal failure.\n");
 #ifndef NDEBUG
-      fprintf(stderr, "    %s:%d\n", file, line);
+      std::fprintf(stderr, "    %s:%d\n", file, line);
 #endif
       if(code >= lvl_abort) {
           std::abort();
