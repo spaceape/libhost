@@ -184,6 +184,14 @@ void  process::set_cwd(const std::filesystem::path& pwd) noexcept
       m_pwd = pwd;
 }
 
+void  process::set_uid(int) noexcept
+{
+}
+
+void  process::set_gid(int) noexcept
+{
+}
+
 void  process::set_kill_time(float time) noexcept
 {
       if(time < 0.0f) {
