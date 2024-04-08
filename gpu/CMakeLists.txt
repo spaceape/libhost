@@ -8,7 +8,7 @@ include_directories(
 set(GPU_SDK_DIR ${HOST_SDK_DIR}/${NAME})
 
 set(inc
-  gl.h
+  gl.h raspblt.h
 )
 
 if(SDK)

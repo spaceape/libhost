@@ -1,7 +1,7 @@
-#ifndef core_sys_h
-#define core_sys_h
+#ifndef core_raspblt_gpu_h
+#define core_raspblt_gpu_h
 /** 
-    Copyright (c) 2020, wicked systems
+    Copyright (c) 2024, wicked systems
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following
@@ -21,57 +21,4 @@
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
-#include "global.h"
-#include <mmi.h>
-#include <mmi/resource.h>
-
-constexpr char EOL ='\n';
-constexpr char NUL = 0;
-constexpr char EOS = NUL;
-
-#ifndef EOF
-constexpr char EOF = -1;
-#endif
-
-constexpr char RET ='\r';
-constexpr char TAB ='\t';
-constexpr char SPC =' ';
-constexpr char ASCII_MAX = 127;
-
-class rio;
-class sio;
-class fio;
-class bio;
-class pio;
-
-namespace sys {
-
-class arg;
-class argv;
-
-class ios;
-
-template<typename Bt = bio, typename Xt = fio>
-class asio;
-
-using fio = ::fio;
-using bio = ::bio;
-using pio = ::pio;
-
-template<typename Xt, std::size_t, std::size_t = 0>
-class var;
-
-class descriptor;
-
-/*namespace sys*/ }
-
-constexpr unsigned int pin_none = 255;
-
-// take ownership of file descriptor (for sys::fio)
-constexpr long int  M_ACQUIRE = 0x00010000;
-
-// method to qualify unix socket (for sys::net)
-constexpr long int  M_BIND = 0x00010000;
-constexpr long int  M_CONNECT = 0x00020000;
-
 #endif
