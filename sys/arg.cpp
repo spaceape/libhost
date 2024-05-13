@@ -89,7 +89,7 @@ bool  arg::has_text() const noexcept
 bool  arg::has_text(const char* text) const noexcept
 {
       if(text) {
-          return std::strncmp(m_text, text, m_size) == 0;
+          return std::strncmp(m_text, text, m_size + 1) == 0;
       }
       return false;
 }
@@ -97,13 +97,9 @@ bool  arg::has_text(const char* text) const noexcept
 bool  arg::has_text(const char* text, int offset, int length) const noexcept
 {
       if(text) {
-          if(offset < m_size) {
-              int l_length_max = m_size - offset;
-              if(length > l_length_max) {
-                  length = l_length_max;
-              }
-              if(length > 0) {
-                  return std::strncmp(m_text, text,  length) == 0;
+          if(length > 0) {
+              if(offset < m_size) {
+                  return std::strncmp(m_text + offset, text, length) == 0;
               }
           }
       }

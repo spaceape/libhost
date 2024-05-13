@@ -25,7 +25,6 @@
 #include <cstdarg>
 
 void printlog(const char*, ...) noexcept;
-void printlog(const char*, const char*, int,  ...) noexcept;
-void printdbg(const char*, ...) noexcept;
+void printlog(const char*, const char*, int, ...) noexcept;
 void printdbg(const char*, const char*, int, ...) noexcept;
 #endif

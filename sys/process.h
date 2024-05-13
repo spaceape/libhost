@@ -35,16 +35,16 @@ class process
   unsigned int  m_status;
 
   std::filesystem::path   m_pwd;
-  float                   m_kill_timeout;
-  bool                    m_listen;
-  bool                    m_block;
-  bool                    m_delete;
+  float   m_kill_timeout;
+  bool    m_listen;
+  bool    m_block;
+  bool    m_delete;
 
   protected:
-  int           m_stdin_pipe[2];
-  int           m_stdout_pipe[2];
-  int           m_stderr_pipe[2];
-  int           m_poll_list[2];
+  int     m_stdin_pipe[2];
+  int     m_stdout_pipe[2];
+  int     m_stderr_pipe[2];
+  int     m_poll_list[2];
 
   public:
   class   monitor
@@ -83,6 +83,8 @@ class process
           pid_t get_pid() const noexcept;
 
           void  set_cwd(const std::filesystem::path&) noexcept;
+          void  set_uid(int) noexcept;
+          void  set_gid(int) noexcept;
           void  set_kill_time(float) noexcept;
           void  set_descriptor_blocking(bool) noexcept;
           void  set_descriptor_polling(bool) noexcept;
@@ -108,7 +110,7 @@ class process
 
           operator bool() const noexcept;
 
-          void   sync(float) noexcept;
+          void  sync(float) noexcept;
 
           process& operator=(const process&) noexcept = delete;
           process& operator=(process&&) noexcept = delete;

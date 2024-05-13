@@ -24,17 +24,25 @@
 
 void  vprintlog(const char* message, const char* file, int line, va_list va) noexcept
 {
-      vfprintf(stdout, message, va);
-      fprintf(stdout, "\n");
+      fprintf(stderr, "(i) ");
+      vfprintf(stderr, message, va);
+      fprintf(stderr, "\n");
+#ifndef NDEBUG
+      if(file != nullptr) {
+          if(line > 0) {
+              fprintf(stderr, "    %s:%d\n", file, line);
+          }
+      }
+#endif
 }
 
 void  printlog(const char* message, ...) noexcept
 {
       va_list va;
       va_start(va, message);
-      vfprintf(stdout, message, va);
+      vfprintf(stderr, message, va);
       va_end(va);
-      fprintf(stdout, "\n");
+      fprintf(stderr, "\n");
 }
 
 void  printlog(const char* message, const char* file, int line, ...) noexcept
