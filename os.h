@@ -55,8 +55,8 @@ constexpr bool  is_windows = (WINDOWS != 0);
 constexpr bool  is_windows = false;
 #endif
 
-constexpr int   memory_page_size = 4096;
-constexpr int   filesystem_block_size = 1024;
+constexpr std::size_t memory_page_size = 4096u;
+constexpr std::size_t filesystem_block_size = 1024u;
 
 /*namespace os*/ }
 #endif

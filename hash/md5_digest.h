@@ -34,6 +34,7 @@ class md5_digest
   inline  md5_digest() noexcept:
           m_ctx(nullptr),
           m_length(EVP_MD_size(EVP_md5())) {
+          m_ctx = EVP_MD_CTX_new();
           reset();
   }
   
