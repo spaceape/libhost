@@ -24,7 +24,11 @@
 #include <cstdint>
 #include <cstdarg>
 
-void printlog(const char*, ...) noexcept;
-void printlog(const char*, const char*, int, ...) noexcept;
-void printdbg(const char*, const char*, int, ...) noexcept;
+void  printlog(const char*, ...) noexcept;
+void  printlog(const char*, const char*, int, ...) noexcept;
+void  printdbg(const char*, const char*, int, ...) noexcept;
+
+bool  log_aux_open(const char*) noexcept;
+void  log_aux_close() noexcept;
+
 #endif

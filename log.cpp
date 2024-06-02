@@ -20,48 +20,79 @@
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include "log.h"
+#include <time.h>
 #include <stdio.h>
 
-void  vprintlog(const char* message, const char* file, int line, va_list va) noexcept
+// static const char*  s_tag_none = "    ";
+static const char*  s_tag_info = "(i) ";
+
+static FILE*  g_log_out = stderr;
+static FILE*  g_log_aux = nullptr;
+
+void  vprintlog(const char* message, const char* file, int line, va_list va_out) noexcept
 {
-      fprintf(stderr, "(i) ");
-      vfprintf(stderr, message, va);
-      fprintf(stderr, "\n");
-#ifndef NDEBUG
-      if(file != nullptr) {
-          if(line > 0) {
-              fprintf(stderr, "    %s:%d\n", file, line);
+      if(g_log_out != nullptr) {
+          auto    l_tag = s_tag_info;
+          va_list va_aux;
+          if(g_log_aux != nullptr) {
+              va_copy(va_aux, va_out);
+              fprintf(g_log_aux, "%.8lx %s", time(nullptr), l_tag);
+              vfprintf(g_log_aux, message, va_aux);
+              fprintf(g_log_aux, "\n");
+              fflush(g_log_aux);
           }
-      }
+          fprintf(g_log_out, l_tag);
+          vfprintf(g_log_out, message, va_out);
+          fprintf(g_log_out, "\n");
+#ifndef NDEBUG
+          if(file != nullptr) {
+              if(line > 0) {
+                  if(g_log_aux) {
+                      fprintf(g_log_aux, "    %s:%d\n", file, line);
+                  }
+                  fprintf(g_log_out, "    %s:%d\n", file, line);
+              }
+          }
 #endif
+      }
 }
 
 void  printlog(const char* message, ...) noexcept
 {
-      va_list va;
-      va_start(va, message);
-      vfprintf(stderr, message, va);
-      va_end(va);
-      fprintf(stderr, "\n");
+      va_list va_out;
+      if(g_log_aux != nullptr) {
+          va_list va_aux;
+          va_copy(va_aux, va_out);
+          va_start(va_aux, message);
+          fprintf(g_log_aux, "%.8lx ", time(nullptr));
+          vfprintf(g_log_aux, message, va_aux);
+          va_end(va_aux);
+          fprintf(g_log_aux, "\n");
+          fflush(g_log_aux);
+      }
+      va_start(va_out, message);
+      vfprintf(g_log_out, message, va_out);
+      va_end(va_out);
+      fprintf(g_log_out, "\n");
 }
 
 void  printlog(const char* message, const char* file, int line, ...) noexcept
 {
-      va_list va;
-      va_start(va, line);
-      vprintlog(message, file, line, va);
-      va_end(va);
+      va_list va_out;
+      va_start(va_out, line);
+      vprintlog(message, file, line, va_out);
+      va_end(va_out);
 }
 
 void  vprintdbg(const char* message, const char* file, int line, va_list va) noexcept
 {
 #ifndef NDEBUG
-      fprintf(stderr, "(i) ");
-      vfprintf(stderr, message, va);
-      fprintf(stderr, "\n");
+      fprintf(g_log_out, "(i) ");
+      vfprintf(g_log_out, message, va);
+      fprintf(g_log_out, "\n");
       if(file != nullptr) {
           if(line > 0) {
-              fprintf(stderr, "    %s:%d\n", file, line);
+              fprintf(g_log_out, "    %s:%d\n", file, line);
           }
       }
 #endif
@@ -72,9 +103,9 @@ void  printdbg(const char* message, ...) noexcept
 #ifndef NDEBUG
       va_list va;
       va_start(va, message);
-      vfprintf(stderr, message, va);
+      vfprintf(g_log_out, message, va);
       va_end(va);
-      fprintf(stderr, "\n");
+      fprintf(g_log_out, "\n");
 #endif
 }
 
@@ -86,4 +117,27 @@ void  printdbg(const char* message, const char* file, int line, ...) noexcept
       vprintdbg(message, file, line, va);
       va_end(va);
 #endif
+}
+
+bool  log_aux_open(const char* filename) noexcept
+{
+      log_aux_close();
+      g_log_aux = fopen(filename, "w+");
+      if(g_log_aux != nullptr) {
+          return true;
+      }
+      return false;
+}
+
+void  log_aux_close() noexcept
+{
+      if(g_log_aux != nullptr) {
+          fclose(g_log_aux);
+          g_log_aux = nullptr;
+      }
+}
+
+__attribute__((destructor))
+void  log_dispose() noexcept {
+      log_aux_close();
 }
