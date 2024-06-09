@@ -23,8 +23,9 @@
 **/
 #include <global.h>
 #include <cstring>
+#include <string>
 
-constexpr int compare(int lhs, int rhs) noexcept
+inline int compare(int lhs, int rhs) noexcept
 {
     if(lhs < rhs) {
         return -1;
@@ -35,7 +36,7 @@ constexpr int compare(int lhs, int rhs) noexcept
         return  0;
 }
 
-constexpr int compare(unsigned int lhs, unsigned int rhs) noexcept
+inline int compare(unsigned int lhs, unsigned int rhs) noexcept
 {
     if(lhs < rhs) {
         return -1;
@@ -46,7 +47,7 @@ constexpr int compare(unsigned int lhs, unsigned int rhs) noexcept
         return  0;
 }
 
-constexpr int compare(long int lhs, long int rhs) noexcept
+inline int compare(long int lhs, long int rhs) noexcept
 {
     if(lhs < rhs) {
         return -1;
@@ -57,7 +58,7 @@ constexpr int compare(long int lhs, long int rhs) noexcept
         return  0;
 }
 
-constexpr int compare(unsigned long int lhs, unsigned long int rhs) noexcept
+inline int compare(unsigned long int lhs, unsigned long int rhs) noexcept
 {
     if(lhs < rhs) {
         return -1;
@@ -68,7 +69,7 @@ constexpr int compare(unsigned long int lhs, unsigned long int rhs) noexcept
         return  0;
 }
 
-constexpr int compare(long long int lhs, long long int rhs) noexcept
+inline int compare(long long int lhs, long long int rhs) noexcept
 {
     if(lhs < rhs) {
         return -1;
@@ -79,7 +80,7 @@ constexpr int compare(long long int lhs, long long int rhs) noexcept
         return  0;
 }
 
-constexpr int compare(unsigned long long int lhs, unsigned long long int rhs) noexcept
+inline int compare(unsigned long long int lhs, unsigned long long int rhs) noexcept
 {
     if(lhs < rhs) {
         return -1;
@@ -90,7 +91,7 @@ constexpr int compare(unsigned long long int lhs, unsigned long long int rhs) no
         return  0;
 }
 
-constexpr int compare(const char* lhs, const char* rhs) noexcept
+inline int compare(const char* lhs, const char* rhs) noexcept
 {
     if(lhs && lhs[0]) {
         if(rhs && rhs[0]) {
@@ -110,7 +111,7 @@ constexpr int compare(const char* lhs, const char* rhs) noexcept
         return 0;
 }
 
-constexpr int compare(const std::string lhs, const char* rhs) noexcept
+inline int compare(const std::string lhs, const char* rhs) noexcept
 {
     if(lhs.size()) {
         if(rhs && rhs[0]) {
@@ -128,7 +129,7 @@ constexpr int compare(const std::string lhs, const char* rhs) noexcept
 }
 
 template<typename Ct>
-constexpr int compare(Ct lhs, Ct rhs) noexcept
+inline int compare(Ct lhs, Ct rhs) noexcept
 {
     if(lhs < rhs) {
         return -1;

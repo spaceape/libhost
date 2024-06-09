@@ -26,6 +26,7 @@
 #include "mmi.h"
 #include <cstring>
 #include <cstdarg>
+#include <cstdio>
 
 class char_base
 {
