@@ -55,6 +55,7 @@ class arg
           int    get_dec_int() const noexcept;
           int    get_hex_int() const noexcept;
           int    get_int() const noexcept;
+          float  get_float() const noexcept;
 
           void   set(char*) noexcept;
           void   set(char*, int) noexcept;

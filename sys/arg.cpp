@@ -149,6 +149,13 @@ int   arg::get_int() const noexcept
       return l_result;
 }
 
+float arg::get_float() const noexcept
+{
+      float l_result = 0.0f;
+      convert<char*>::get_float_value(l_result, m_text, m_size);
+      return l_result;
+}
+
 void  arg::set(char* text) noexcept
 {
       m_text = text;
