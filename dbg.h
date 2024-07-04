@@ -33,37 +33,42 @@ static constexpr bool is_debug = true;
 inline void dbg_dump_hex(void* bytes, int size, bool use_absolute_address = false) noexcept
 {
       if constexpr (is_debug) {
-          int   i_byte = 0;
-          int   l_width = 16;
-          char  l_hex_cache[128];
-          char  l_ascii_cache[128];
-          ssize_t l_data_base = 0;
-          auto l_data_ptr = reinterpret_cast<std::uint8_t*>(bytes);
+          int   l_width = 8;
+          int   l_left = size;
+          auto  p_data_ptr = reinterpret_cast<std::uint8_t*>(bytes);
+          auto  p_data_end = p_data_ptr + size;
+          off_t l_addr = 0;
+          char  l_hex_cache[48];
+          char  l_ascii_cache[16];
           if(use_absolute_address == true) {
-              l_data_base = reinterpret_cast<off_t>(bytes);
+              l_addr = reinterpret_cast<off_t>(bytes);
           }
-          while(i_byte < size) {
-              int  i_column       = 0;
-              int  l_data_offset  = i_byte;
-              int  l_print_offset = 0;
-              // print hex dump
-              while(i_column < l_width) {
-                  l_ascii_cache[i_column] = '.';
-                  if(i_byte < size) {
-                      l_print_offset += std::snprintf(l_hex_cache + l_print_offset, 4, "%.2x ",  *l_data_ptr);
-                      if((*l_data_ptr > 32) &&
-                          (*l_data_ptr < 128)) {
-                          l_ascii_cache[i_column] = *l_data_ptr;
-                      }
-                      l_data_ptr++;
+          while(p_data_ptr < p_data_end) {
+              int l_hex_offset = 0;
+              int l_ascii_offset = 0;
+              for(int i_cx = 0; i_cx < l_width; i_cx++) {
+                  if(i_cx < l_left) {
+                      l_hex_offset += std::sprintf(l_hex_cache + l_hex_offset, "%.2x ", p_data_ptr[i_cx]);
                   } else
-                      l_print_offset += std::snprintf(l_hex_cache + l_print_offset, 4, "   ");
-                  i_column++;
-                  i_byte++;
+                      l_hex_offset += std::sprintf(l_hex_cache + l_hex_offset, "   ");
               }
-              l_hex_cache[l_print_offset] = 0;
-              l_ascii_cache[i_column] = 0;
-              printf("    %.8x: %s %s\n", l_data_base + l_data_offset, l_hex_cache, l_ascii_cache);
+              for(int i_cx = 0; i_cx < l_width; i_cx++) {
+                  if(i_cx < l_left) {
+                      if((p_data_ptr[i_cx] >= 32) &&
+                          (p_data_ptr[i_cx]) <= 127) {
+                          l_ascii_cache[i_cx] = p_data_ptr[i_cx];
+                      } else
+                          l_ascii_cache[i_cx] = '.';
+                  } else
+                      l_ascii_cache[i_cx] = ' ';
+                  l_ascii_offset++;
+              }
+              l_hex_cache[l_hex_offset] = 0;
+              l_ascii_cache[l_ascii_offset] = 0;
+              printf("    %.8lx: %s %s\n", l_addr, l_hex_cache, l_ascii_cache);
+              l_left     -= l_width;
+              l_addr     += l_width;
+              p_data_ptr += l_width;
           }
       }
 }
