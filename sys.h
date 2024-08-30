@@ -72,5 +72,4 @@ constexpr int SEEK_CUR = 1;
 constexpr int SEEK_END = 2;
 #endif 
 
-constexpr unsigned int pin_none = 255;
 #endif

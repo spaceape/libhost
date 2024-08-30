@@ -36,13 +36,7 @@ add_subdirectory(hash)
 
 add_library(${NAME} STATIC ${srcs})
 set_target_properties(${NAME} PROPERTIES PREFIX "${PREFIX}")
-target_link_libraries(
-  ${NAME}
-  PUBLIC
-    ${libs}
-  PRIVATE
-    pico_stdlib
-)
+target_link_libraries(${NAME} ${libs})
 
 if(SDK)
   file(MAKE_DIRECTORY ${HOST_SDK_DIR})

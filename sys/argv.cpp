@@ -274,7 +274,7 @@ int   argv::load(char* str, int) noexcept
       return m_arg_count;
 }
 
-int   argv::load(char** argv, int argc) noexcept
+int   argv::load(char** args, int argc) noexcept
 {
       m_arg_lb = 0;
       m_arg_ub = 0;
@@ -287,13 +287,13 @@ int   argv::load(char** argv, int argc) noexcept
                     i_arg = 0;
                     (i_arg < argc) && (i_arg < arg_near_reserve);
                     i_arg++) {
-                    m_arg_near[i_arg] = arg(argv[i_arg]);
+                    m_arg_near[i_arg] = arg(args[i_arg]);
               }
               for(int
                     i_arg = arg_near_reserve;
                     i_arg < argc;
                     i_arg++) {
-                    m_arg_far[i_arg - arg_near_reserve] = arg(argv[i_arg]);
+                    m_arg_far[i_arg - arg_near_reserve] = arg(args[i_arg]);
                       
               }
               m_arg_count = argc;
