@@ -264,6 +264,18 @@ int   argv::load(char* str, int) noexcept
                   break;
               }
           }
+          else {
+              printdbg(
+                  "Invalid character while parsing argument %d.\n"
+                  " \"  %s \" ",
+                  __FILE__,
+                  __LINE__,
+                  l_arg_index,
+                  str
+              );
+              l_arg_index = 0;
+              break;
+          }
           if(l_has_next) {
               l_str_iter++;
           }
