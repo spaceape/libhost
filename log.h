@@ -26,6 +26,7 @@
 
 void  printlog(const char*, ...) noexcept;
 void  printlog(const char*, const char*, int, ...) noexcept;
+void  vprintlog(const char*, const char*, int, va_list) noexcept;
 void  printdbg(const char*, const char*, int, ...) noexcept;
 
 bool  log_aux_open(const char*) noexcept;
