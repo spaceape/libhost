@@ -75,7 +75,7 @@ class char_ptr: public char_base
           char*  reserve(size_t length) noexcept {
           if(length < std::numeric_limits<unsigned int>::max() - 1) {
               size_t l_size = length + 1;
-              if(l_size <  text_size) {
+              if(l_size < text_size) {
                   dispose();
                   base_type::m_value = std::addressof(m_data[0]);
                   base_type::m_length = length;
@@ -121,16 +121,16 @@ class char_ptr: public char_base
   }
 
   protected:
-          void assign(const char* value, size_t length = 0) noexcept {
+  inline  auto assign(const char* value, size_t length = 0) noexcept -> const char* {
           if(value) {
               if(value[0]) {
                   if(value != base_type::m_value) {
                       if(length == 0) {
                           length = std::strlen(value);
                       }
-                      
                       if(auto l_text = reserve(length); l_text != nullptr) {
                           std::strncpy(l_text, value, length + 1);
+                          return m_data;
                       } else
                           dispose();
                   }
@@ -138,6 +138,7 @@ class char_ptr: public char_base
                   dispose();
           } else
               dispose();
+          return nullptr;
   }
 
   inline  void assign(const char_ptr& copy) noexcept {
@@ -191,6 +192,11 @@ class char_ptr: public char_base
               return nullptr;
   }
 
+  inline  const char*  set(const char* value, std::size_t length = 0) noexcept
+  {
+          return assign(value, length);
+  }
+
   inline  const char*  fmt(const char* fmt, ...) noexcept {
           va_list va;
           va_start(va, fmt);
@@ -218,7 +224,7 @@ class char_ptr: public char_base
           return base_type::m_length;
   }
 
-  inline  void reset(const char* value, std::size_t length = 0) noexcept {
+  inline  const char* reset(const char* value, std::size_t length = 0) noexcept {
           return assign(value, length);
   }
 
