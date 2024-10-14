@@ -135,12 +135,11 @@ class flat_map: public flat_map_traits<Kt, Xt>::base_type
           m_pos(base_type::end()),
           m_replace_bit(replace),
           m_remove_bit(remove) {
-          m_pos = base_type::end();
   }
 
   inline  flat_map(size_t reserve, bool replace = false, bool remove = true) noexcept:
           base_type(),
-          m_pos(base_type::end()),
+          m_pos(),
           m_replace_bit(replace),
           m_remove_bit(remove) {
           base_type::reserve(reserve);
