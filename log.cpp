@@ -1,4 +1,4 @@
-/** 
+/**
     Copyright (c) 2018, wicked systems
     All rights reserved.
 
@@ -6,22 +6,23 @@
     conditions are met:
     * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
       disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following 
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided with the distribution.
     * Neither the name of wicked systems nor the names of its contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include "log.h"
 #include <time.h>
 #include <stdio.h>
+#include "dbg.h"
 
 // static const char*  s_tag_none = "    ";
 static const char*  s_tag_info = "(i) ";
@@ -84,38 +85,39 @@ void  printlog(const char* message, const char* file, int line, ...) noexcept
       va_end(va_out);
 }
 
-void  vprintdbg(const char* message, const char* file, int line, va_list va) noexcept
-{
-#ifndef NDEBUG
-      fprintf(g_log_out, "(i) ");
-      vfprintf(g_log_out, message, va);
-      fprintf(g_log_out, "\n");
-      if(file != nullptr) {
-          if(line > 0) {
-              fprintf(g_log_out, "    %s:%d\n", file, line);
-          }
-      }
-#endif
-}
-
-void  printdbg(const char* message, ...) noexcept
-{
-#ifndef NDEBUG
-      va_list va;
-      va_start(va, message);
-      vfprintf(g_log_out, message, va);
-      va_end(va);
-      fprintf(g_log_out, "\n");
-#endif
-}
-
 void  printdbg(const char* message, const char* file, int line, ...) noexcept
 {
-#ifndef NDEBUG
-      va_list va;
-      va_start(va, line);
-      vprintdbg(message, file, line, va);
-      va_end(va);
+#if DEBUG
+      va_list va_list;
+      va_start(va_list, line);
+      if(DEBUG >= dbg_level_verbose) {
+          vprintlog(message, file, line, va_list);
+      }
+      va_end(va_list);
+#endif
+}
+
+void  printdbgi(const char* message, const char* file, int line, ...) noexcept
+{
+#if DEBUG
+      va_list va_list;
+      va_start(va_list, line);
+      if(DEBUG >= dbg_level_info) {
+          vprintlog(message, file, line, va_list);
+      }
+      va_end(va_list);
+#endif
+}
+
+void  printdbgw(const char* message, const char* file, int line, ...) noexcept
+{
+#if DEBUG
+      va_list va_list;
+      va_start(va_list, line);
+      if(DEBUG >= dbg_level_warning) {
+          vprintlog(message, file, line, va_list);
+      }
+      va_end(va_list);
 #endif
 }
 
