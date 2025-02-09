@@ -1,5 +1,5 @@
-#ifndef mmi_flat_list_h
-#define mmi_flat_list_h
+#ifndef mmi_pair_list_h
+#define mmi_pair_list_h
 /**
     Copyright (c) 2018, wicked systems
     All rights reserved.
@@ -27,71 +27,66 @@
 
 namespace mmi {
 
-template<typename Xt>
-class flat_list: public std::vector<Xt>
+template<typename Kt, typename Vt>
+class pair_list: public std::vector<mmi::flat_list_traits::key_value_pair<Kt, Vt>>
 {
-  using  base_type = typename std::vector<Xt>;
+  using  base_type = typename std::vector<mmi::flat_list_traits::key_value_pair<Kt, Vt>>;
 
   public:
-  using  node_type = typename std::remove_cv<Xt>::type;
+  using  key_type = typename mmi::flat_list_traits::key_value_pair<Kt, Vt>::key_type;
+  using  value_type = typename mmi::flat_list_traits::key_value_pair<Kt, Vt>::value_type;
+  using  node_type = typename mmi::flat_list_traits::key_value_pair<Kt, Vt>;
 
-  using  iterator_type = typename base_type::iterator;
-  using  const_iterator_type = typename base_type::const_iterator;
+  using  iterator = typename base_type::iterator;
+  using  const_iterator = typename base_type::const_iterator;
+
+  using  iter_type = iterator;
 
   static constexpr size_t elements_min = global::cache_small_max;
   static constexpr size_t elements_max = 0;
 
   public:
-  inline  flat_list() noexcept:
+  inline  pair_list() noexcept:
           base_type() {
   }
 
-  inline  flat_list(size_t reserve) noexcept:
+  inline  pair_list(size_t reserve) noexcept:
           base_type() {
           base_type::reserve(reserve);
   }
 
-  inline  flat_list(const flat_list& copy) noexcept:
+  inline  pair_list(const pair_list& copy) noexcept:
           base_type(copy) {
   }
 
-  inline  flat_list(flat_list&& copy) noexcept:
+  inline  pair_list(pair_list&& copy) noexcept:
           base_type(std::move(copy)) {
   }
 
-          ~flat_list() {
+          ~pair_list() {
   }
 
-  inline  auto find(const node_type& node) noexcept -> iterator_type {
+  inline  iterator find(const key_type& key) noexcept {
           for(auto it = base_type::begin(); it != base_type::end(); it++) {
-              if(it.operator*() == node) {
+              if(it->key == key) {
                   return it;
               }
           }
           return base_type::end();
   }
 
-  inline  auto find(node_type* node_ptr) noexcept -> iterator_type {
-          for(auto it = base_type::begin(); it != base_type::end(); it++) {
-              if(std::addressof(*it) == node_ptr) {
-                  return it;
-              }
-          }
-          return base_type::end();
-  }
-
-  inline  bool contains(const node_type& node) const noexcept {
+  inline  bool contains(const key_type& key) const noexcept {
           for(auto it = base_type::cbegin(); it != base_type::cend(); it++) {
-              if(it.operator*() == node) {
+              if(it->key == key) {
                   return true;
               }
           }
           return false;
   }
 
-  inline  bool remove(const node_type& node) noexcept {
+  inline  bool remove(const key_type& key) noexcept {
           for(auto it = base_type::begin(); it != base_type::end(); it++) {
-              if(it.operator*() == node) {
+              if(it->key == key) {
                   base_type::erase(it);
                   return true;
               }
@@ -99,20 +94,15 @@ class flat_list: public std::vector<Xt>
           return false;
   }
 
-  inline  auto remove(iterator_type pos) noexcept -> iterator_type {
-          return base_type::erase(pos);
-  }
-
-  inline  flat_list& operator=(const flat_list& rhs) noexcept {
+  inline  pair_list& operator=(const pair_list& rhs) noexcept {
           base_type::operator=(rhs);
           return *this;
   }
 
-  inline  flat_list& operator=(flat_list&& rhs) noexcept {
+  inline  pair_list& operator=(pair_list&& rhs) noexcept {
           base_type::operator=(std::move(rhs));
           return *this;
   }
 };
-
 /*namespace mmi*/ }
 #endif

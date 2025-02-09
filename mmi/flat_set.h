@@ -1,6 +1,6 @@
 #ifndef mmi_flat_set_h
 #define mmi_flat_set_h
-/** 
+/**
     Copyright (c) 2022, wicked systems
     All rights reserved.
 
@@ -8,16 +8,16 @@
     conditions are met:
     * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
       disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following 
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided with the distribution.
     * Neither the name of wicked systems nor the names of its contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
@@ -26,7 +26,7 @@
 #include <memory_resource>
 
 namespace mmi {
-  
+
 template<typename Xt>
 class flat_set: public flat_set_traits<Xt>::base_type
 {
@@ -44,6 +44,7 @@ class flat_set: public flat_set_traits<Xt>::base_type
          >::type;
 
   using  iterator_type = typename flat_set_traits<Xt>::iterator_type;
+  using  const_iterator_type = typename flat_set_traits<Xt>::const_iterator_type;
   using  result_type   = node_type*;
 
   private:
@@ -149,7 +150,7 @@ class flat_set: public flat_set_traits<Xt>::base_type
   inline  flat_set(const flat_set& copy) noexcept:
           base_type(copy),
           m_pos(copy.m_pos),
-          m_replace_bit(copy.m_replace_bit), 
+          m_replace_bit(copy.m_replace_bit),
           m_remove_bit(copy.m_remove_bit) {
   }
 
@@ -176,7 +177,7 @@ class flat_set: public flat_set_traits<Xt>::base_type
   inline  bool contains(key_type key) noexcept {
           return find(key) != base_type::end();
   }
-  
+
   /* insert()
   */
           iterator_type insert(key_type key) noexcept {
@@ -249,10 +250,14 @@ class flat_set: public flat_set_traits<Xt>::base_type
           }
   }
 
-  /* remove()
-  */
-  inline  void remove(iterator_type pos) noexcept {
+  inline  auto remove(iterator_type pos) noexcept -> iterator_type {
           m_pos = base_type::erase(pos);
+          return m_pos;
+  }
+
+  inline  auto remove(const_iterator_type pos) noexcept -> iterator_type {
+          m_pos = base_type::erase(pos);
+          return m_pos;
   }
 
   inline  iterator_type begin() noexcept {
@@ -262,7 +267,7 @@ class flat_set: public flat_set_traits<Xt>::base_type
   inline  iterator_type position() noexcept {
           return m_pos;
   }
-  
+
   inline  iterator_type position(off_t offset) noexcept {
           iterator_type l_result = m_pos;
           if(l_result != base_type::end()) {
@@ -270,15 +275,15 @@ class flat_set: public flat_set_traits<Xt>::base_type
           }
           return l_result;
   }
-  
+
   inline  iterator_type none() noexcept {
           return base_type::end();
   }
-  
+
   inline  iterator_type end() noexcept {
           return base_type::end();
   }
-  
+
   /* reserve()
   */
   inline  void reserve(size_t count) noexcept {

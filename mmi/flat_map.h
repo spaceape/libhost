@@ -259,6 +259,11 @@ class flat_map: public flat_map_traits<Kt, Xt>::base_type
           }
   }
 
+  inline  auto remove(iterator_type pos) noexcept -> iterator_type {
+          m_pos = base_type::erase(pos);
+          return m_pos;
+  }
+
   /* remove_any()
    * erase any node where the given value matches, return count
   */
@@ -273,13 +278,6 @@ class flat_map: public flat_map_traits<Kt, Xt>::base_type
                   i_node++;
           }
           return l_result;
-  }
-
-  /* remove()
-  */
-  inline  auto remove(iterator_type pos) noexcept -> iterator_type {
-          m_pos = base_type::erase(pos);
-          return m_pos;
   }
 
   inline  iterator_type begin() noexcept {
