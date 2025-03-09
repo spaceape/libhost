@@ -62,6 +62,14 @@ class flat_list: public std::vector<Xt>
           ~flat_list() {
   }
 
+  inline  void insert(const node_type& node) noexcept {
+          base_type::emplace_back(node);
+  }
+
+  inline  void insert(node_type&& node) noexcept {
+          base_type::emplace_back(std::move(node));
+  }
+
   inline  auto find(const node_type& node) noexcept -> iterator_type {
           for(auto it = base_type::begin(); it != base_type::end(); it++) {
               if(it.operator*() == node) {
@@ -71,13 +79,36 @@ class flat_list: public std::vector<Xt>
           return base_type::end();
   }
 
-  inline  auto find(node_type* node_ptr) noexcept -> iterator_type {
+  inline  auto find(node_type* ptr) noexcept -> iterator_type {
           for(auto it = base_type::begin(); it != base_type::end(); it++) {
-              if(std::addressof(*it) == node_ptr) {
+              if(std::addressof(*it) == ptr) {
                   return it;
               }
           }
           return base_type::end();
+  }
+
+  inline  int  get_index_of(const node_type& node) noexcept {
+          auto it = find(node);
+          if(it != base_type::end()) {
+              return std::distance(base_type::begin(), it);
+          }
+          return -1;
+  }
+
+  inline  int  get_index_of(node_type* ptr) noexcept {
+          auto it = find(ptr);
+          if(it != base_type::end()) {
+              return std::distance(base_type::begin(), it);
+          }
+          return -1;
+  }
+
+  inline  int  get_index_of(iterator_type it) noexcept {
+          if(it != base_type::end()) {
+              return std::distance(base_type::begin(), it);
+          }
+          return -1;
   }
 
   inline  bool contains(const node_type& node) const noexcept {
@@ -101,6 +132,13 @@ class flat_list: public std::vector<Xt>
 
   inline  auto remove(iterator_type pos) noexcept -> iterator_type {
           return base_type::erase(pos);
+  }
+
+  inline  void remove(int index) noexcept {
+          if((index >= 0) &&
+              (index <= static_cast<int>(base_type::size()))) {
+              remove(base_type::begin() + index);
+          }
   }
 
   inline  flat_list& operator=(const flat_list& rhs) noexcept {

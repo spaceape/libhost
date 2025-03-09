@@ -67,6 +67,19 @@ namespace flat_list_traits {
 
       key_type key;
       value_type value;
+
+      key_value_pair(const key_type& key_arg, const value_type& value_arg) noexcept:
+          key(key_arg),
+          value(value_arg) {
+      }
+
+      key_value_pair(const key_type& key_arg, value_type&& value_arg) noexcept:
+          key(key_arg),
+          value(std::move(value_arg)) {
+      }
+
+      ~key_value_pair() {
+      }
   };
 
 /*namespace flat_list_traits*/ }

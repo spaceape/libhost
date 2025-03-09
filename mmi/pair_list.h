@@ -37,10 +37,8 @@ class pair_list: public std::vector<mmi::flat_list_traits::key_value_pair<Kt, Vt
   using  value_type = typename mmi::flat_list_traits::key_value_pair<Kt, Vt>::value_type;
   using  node_type = typename mmi::flat_list_traits::key_value_pair<Kt, Vt>;
 
-  using  iterator = typename base_type::iterator;
-  using  const_iterator = typename base_type::const_iterator;
-
-  using  iter_type = iterator;
+  using  iterator_type = typename base_type::iterator;
+  using  const_iterator_type = typename base_type::const_iterator;
 
   static constexpr size_t elements_min = global::cache_small_max;
   static constexpr size_t elements_max = 0;
@@ -66,13 +64,29 @@ class pair_list: public std::vector<mmi::flat_list_traits::key_value_pair<Kt, Vt
           ~pair_list() {
   }
 
-  inline  iterator find(const key_type& key) noexcept {
+  inline  void insert(const key_type& key, const value_type& value) noexcept {
+          base_type::emplace_back(key, value);
+  }
+
+  inline  void insert(const key_type& key, value_type&& value) noexcept {
+          base_type::emplace_back(key, std::move(value));
+  }
+
+  inline  iterator_type find(const key_type& key) noexcept {
           for(auto it = base_type::begin(); it != base_type::end(); it++) {
               if(it->key == key) {
                   return it;
               }
           }
           return base_type::end();
+  }
+
+  inline  int  get_index_of(const key_type& key) noexcept {
+          auto it = find(key);
+          if(it != base_type::end()) {
+              return std::distance(base_type::begin(), it);
+          }
+          return -1;
   }
 
   inline  bool contains(const key_type& key) const noexcept {
@@ -92,6 +106,17 @@ class pair_list: public std::vector<mmi::flat_list_traits::key_value_pair<Kt, Vt
               }
           }
           return false;
+  }
+
+  inline  auto remove(iterator_type pos) noexcept -> iterator_type {
+          return base_type::erase(pos);
+  }
+
+  inline  void remove(int index) noexcept {
+          if((index >= 0) &&
+              (index <= static_cast<int>(base_type::size()))) {
+              remove(base_type::begin() + index);
+          }
   }
 
   inline  pair_list& operator=(const pair_list& rhs) noexcept {
