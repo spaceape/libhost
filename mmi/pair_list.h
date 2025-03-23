@@ -72,6 +72,16 @@ class pair_list: public std::vector<mmi::flat_list_traits::key_value_pair<Kt, Vt
           base_type::emplace_back(key, std::move(value));
   }
 
+  template<typename It>
+  inline  auto insert(It pos, const key_type& key, const value_type& value) noexcept {
+          return base_type::insert(pos, node_type(key, value));
+  }
+
+  template<typename It>
+  inline  auto insert(It pos, const key_type& key, value_type&& value) noexcept {
+          return base_type::insert(pos, node_type(key, std::move(value)));
+  }
+
   inline  iterator_type find(const key_type& key) noexcept {
           for(auto it = base_type::begin(); it != base_type::end(); it++) {
               if(it->key == key) {

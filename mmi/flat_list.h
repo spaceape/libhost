@@ -70,6 +70,16 @@ class flat_list: public std::vector<Xt>
           base_type::emplace_back(std::move(node));
   }
 
+  template<typename It>
+  inline  auto insert(It pos, const node_type& node) noexcept {
+          return base_type::insert(pos, node);
+  }
+
+  template<typename It>
+  inline  auto insert(It pos, node_type&& node) noexcept {
+          return base_type::insert(pos, std::move(node));
+  }
+
   inline  auto find(const node_type& node) noexcept -> iterator_type {
           for(auto it = base_type::begin(); it != base_type::end(); it++) {
               if(it.operator*() == node) {
