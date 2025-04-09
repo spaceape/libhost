@@ -24,57 +24,41 @@
 #include <stdio.h>
 #include "dbg.h"
 
-// static const char*  s_tag_none = "    ";
-static const char*  s_tag_info = "(i) ";
-
-static FILE*  g_log_out = stderr;
 static FILE*  g_log_aux = nullptr;
 
 void  vprintlog(const char* message, const char* file, int line, va_list va_out) noexcept
 {
-      if(g_log_out != nullptr) {
-          auto    l_tag = s_tag_info;
-          va_list va_aux;
-          if(g_log_aux != nullptr) {
-              va_copy(va_aux, va_out);
-              fprintf(g_log_aux, "%.8lx %s", time(nullptr), l_tag);
-              vfprintf(g_log_aux, message, va_aux);
-              fprintf(g_log_aux, "\n");
-              fflush(g_log_aux);
-          }
-          fprintf(g_log_out, l_tag);
-          vfprintf(g_log_out, message, va_out);
-          fprintf(g_log_out, "\n");
-#ifndef NDEBUG
-          if(file != nullptr) {
-              if(line > 0) {
-                  if(g_log_aux) {
-                      fprintf(g_log_aux, "    %s:%d\n", file, line);
-                  }
-                  fprintf(g_log_out, "    %s:%d\n", file, line);
-              }
-          }
-#endif
-      }
-}
-
-void  printlog(const char* message, ...) noexcept
-{
-      va_list va_out;
+      va_list va_aux;
+      FILE*   p_log_out;
+      bool    l_tag_error =
+          (message != nullptr) &&
+          (message[0] == '-') &&
+          ((message[1] == '!') || (message[1] == '-')) &&
+          (message[2] == '-') &&
+          (message[3] == ' ');
+      if(l_tag_error) {
+          p_log_out = stderr;
+      } else
+          p_log_out = stdout;
       if(g_log_aux != nullptr) {
-          va_list va_aux;
           va_copy(va_aux, va_out);
-          va_start(va_aux, message);
-          fprintf(g_log_aux, "%.8lx ", time(nullptr));
+          fprintf(g_log_aux, "%.8lx| ", time(nullptr));
           vfprintf(g_log_aux, message, va_aux);
-          va_end(va_aux);
           fprintf(g_log_aux, "\n");
           fflush(g_log_aux);
       }
-      va_start(va_out, message);
-      vfprintf(g_log_out, message, va_out);
-      va_end(va_out);
-      fprintf(g_log_out, "\n");
+      vfprintf(p_log_out, message, va_out);
+      fprintf(p_log_out, "\n");
+#ifndef NDEBUG
+      if(file != nullptr) {
+          if(l_tag_error) {
+              if(g_log_aux) {
+                  fprintf(g_log_aux, "    %s:%d\n", file, line);
+              }
+              fprintf(p_log_out, "    %s:%d\n", file, line);
+          }
+      }
+#endif
 }
 
 void  printlog(const char* message, const char* file, int line, ...) noexcept
