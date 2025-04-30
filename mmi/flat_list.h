@@ -121,6 +121,18 @@ class flat_list: public std::vector<Xt>
           return -1;
   }
 
+  inline  auto get_iterator_at(int index) noexcept -> iterator_type {
+          if((index >= 0) &&
+              (index < static_cast<int>(base_type::size()))) {
+              return base_type::begin() + index;
+          } else
+          if((index < 0) &&
+              (index >= 0 - static_cast<int>(base_type::size()))) {
+              return base_type::end() + index;
+          }
+          return base_type::end();
+  }
+
   inline  bool contains(const node_type& node) const noexcept {
           for(auto it = base_type::cbegin(); it != base_type::cend(); it++) {
               if(it.operator*() == node) {
