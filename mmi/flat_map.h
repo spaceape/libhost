@@ -176,14 +176,24 @@ class flat_map: public flat_map_traits<Kt, Xt>::base_type
   /* find_by_value()
   */
   inline  iterator_type find_by_value(const value_type& value) noexcept {
-          iterator_type i_pos = base_type::begin();
-          while(i_pos != base_type::end()) {
-              if(i_pos->value == value) {
-                  break;
+          iterator_type i_node = base_type::begin();
+          while(i_node != base_type::end()) {
+              if(i_node->value == value) {
+                  return i_node;
               }
-              ++i_pos;
+              ++i_node;
           }
-          return i_pos;
+          return base_type::end();
+  }
+
+  template<typename Ot>
+  inline  iterator_type find_by_value(Ot value) noexcept {
+          for(auto i_node = base_type::begin(); i_node != base_type::end(); i_node++) {
+              if(i_node->value == value) {
+                  return i_node;
+              }
+          }
+          return base_type::end();
   }
 
   /* insert()

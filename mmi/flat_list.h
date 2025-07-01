@@ -98,6 +98,16 @@ class flat_list: public std::vector<Xt>
           return base_type::end();
   }
 
+  template<typename Ot>
+  inline  iterator_type find(Ot value) noexcept {
+          for(auto it = base_type::begin(); it != base_type::end(); it++) {
+              if(it.operator*() == value) {
+                  return it;
+              }
+          }
+          return base_type::end();
+  }
+
   inline  int  get_index_of(const node_type& node) noexcept {
           auto it = find(node);
           if(it != base_type::end()) {

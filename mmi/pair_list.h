@@ -91,6 +91,16 @@ class pair_list: public std::vector<mmi::flat_list_traits::key_value_pair<Kt, Vt
           return base_type::end();
   }
 
+  template<typename Ot>
+  inline  iterator_type find_by_value(Ot value) noexcept {
+          for(auto it = base_type::begin(); it != base_type::end(); it++) {
+              if(it->value == value) {
+                  return it;
+              }
+          }
+          return base_type::end();
+  }
+
   inline  int  get_index_of(const key_type& key) noexcept {
           auto it = find(key);
           if(it != base_type::end()) {
