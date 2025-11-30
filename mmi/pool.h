@@ -1,6 +1,6 @@
 #ifndef mmi_pool_h
 #define mmi_pool_h
-/** 
+/**
     Copyright (c) 2020, wicked systems
     All rights reserved.
 
@@ -8,22 +8,23 @@
     conditions are met:
     * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
       disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following 
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided with the distribution.
     * Neither the name of wicked systems nor the names of its contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
 #include "pool_base.h"
 #include <cstdarg>
 #include <cstring>
+#include <cstdio>
 
 namespace mmi {
 
@@ -57,7 +58,7 @@ class pool: public pool_base<Xt, Rt>
           } else
               return nullptr;
   }
-  
+
   template<typename... Args>
   inline  node_type*  raw_get(Args&&... args) noexcept {
           return  base_type::raw_get(std::forward<Args>(args)...);
@@ -97,103 +98,156 @@ class pool: public pool_base<Xt, Rt>
    memory pool specialization for char
 */
 template<typename Rt>
-class pool<char, Rt>: public pool_base<char, Rt>
+class pool<char, Rt>
 {
   public:
-  using  base_type     = pool_base<char, Rt>;
-  using  node_type     = typename base_type::node_type;
+  using  node_type     = char;
+  using  resource_type = typename std::remove_cv<Rt>::type;
+
+  protected:
+  resource_type m_resource;
+  char*         m_base;
+  char*         m_used;
+  char*         m_next;
+  char*         m_last;
+  size_t        m_size;
 
   public:
   inline  pool() noexcept:
-          base_type() {
+          m_resource(),
+          m_base(nullptr),
+          m_used(nullptr),
+          m_next(nullptr),
+          m_last(nullptr),
+          m_size(0ul) {
   }
 
-  inline  pool(std::size_t size_min, std::size_t size_max, std::size_t size_alloc = global::cache_large_max) noexcept:
-          base_type(size_min, size_max, size_alloc) {
+  inline  pool(std::size_t reserve_size) noexcept:
+          pool() {
+          reserve(reserve_size);
   }
 
           pool(const pool& copy) noexcept = delete;
           pool(pool&& copy) noexcept = delete;
 
-  inline  auto   save() const noexcept -> std::size_t {
-          return base_type::m_tail - base_type::m_head;
+  /**/    ~pool() {
+          if(m_base != nullptr) {
+              m_resource.deallocate(m_base, m_size, alignof(max_align_t));
+          }
   }
 
-  inline  void   save(std::size_t& offset) const noexcept {
-          offset = save();
+  inline  auto   save() const noexcept -> char* {
+          return m_next;
   }
 
-  inline  char*  ptr_get(const char* src, std::size_t length = 0) noexcept {
-          auto   l_offset = base_type::get_tail_pos();
-          if(src) {
-              if(src[0]) {
-                  if(length == 0) {
-                      length = std::strlen(src);
-                  }
-                  base_type::raw_get_array(length + 1);
-                  if(char* l_dst = base_type::at(l_offset); l_dst != nullptr) {
-                      std::strncpy(l_dst, src, length + 1);
-                  }
-                  base_type::raw_unget(1);
+  inline  void   save(const char*& position) const noexcept {
+          position = save();
+  }
+
+  inline  char*  acquire(std::size_t length) noexcept {
+          if(m_next != nullptr) {
+              char* p_raw = m_used;
+              char* p_next = m_used + length + 1ul;
+              if(p_next <= m_last) {
+                  p_raw[length] = 0;
+                  m_next = p_next;
+                  return p_raw;
               }
           }
-          return base_type::at(l_offset);
+          return nullptr;
   }
 
-  inline  char*  raw_get(std::size_t count) noexcept {
-          return base_type::raw_get_array(count);
+  inline  char*  acquire(std::size_t length, const char* copy) noexcept {
+          char*  p_raw = acquire(length);
+          if(p_raw != nullptr) {
+              strncpy(p_raw, copy, length + 1ul);
+          }
+          return p_raw;
   }
-  
-  inline  char*  ptr_fmt_v(const char* fmt, va_list va) noexcept {
-          va_list l_vc;
-          int     l_length;
-          auto    l_offset = base_type::get_tail_pos();
-          if(fmt) {
+
+  inline  char*  acquire(const char* copy) noexcept {
+          if(copy != nullptr) {
+              return acquire(strnlen(copy, m_size), copy);
+          }
+          return nullptr;
+  }
+
+  inline  char*  fvacquire(const char* format, va_list va) noexcept {
+          char*  p_raw = nullptr;
+          int    l_len = 0;
+          if(format != nullptr) {
+              va_list l_vc;
               va_copy(l_vc, va);
-              l_length = std::vsnprintf(nullptr, 0, fmt, va);
-              if(l_length) {
-                  base_type::raw_get_array(l_length + 1);
-                  if(char* l_dst = base_type::at(l_offset); l_dst != nullptr) {
-                      std::vsnprintf(l_dst, l_length + 1, fmt, l_vc);
-                  }
-                  base_type::raw_unget(1);
+              l_len = std::vsnprintf(nullptr, 0, format, va);
+              p_raw = acquire(l_len);
+              if(p_raw != nullptr) {
+                  std::vsnprintf(p_raw, l_len + 1, format, l_vc);
               }
               va_end(l_vc);
           }
-          return base_type::at(l_offset);
+          return p_raw;
   }
 
-  inline  char*  ptr_fmt(const char* fmt, ...) noexcept {
-          char*   l_result;
+  inline  char*  facquire(const char* format, ...) noexcept {
+          char*   p_raw;
           va_list l_va;
-          va_start(l_va, fmt);
-          l_result = ptr_fmt_v(fmt, l_va);
+          va_start(l_va, format);
+          p_raw = fvacquire(format, l_va);
           va_end(l_va);
-          return  l_result;
+          return  p_raw;
   }
 
-  inline  char*  raw_unget(std::size_t count) noexcept {
-          return base_type::raw_unget(count);
-  }
-  
-  inline  char*  ptr_unget(std::size_t count) noexcept {
-          return base_type::raw_unget(count);
+  inline  std::size_t commit() noexcept {
+          std::ptrdiff_t l_length = m_next - m_used - 1l;
+          m_used = m_next;
+          return l_length;
   }
 
-  inline  auto   get_length(std::size_t offset) const noexcept {
-          return base_type::get_tail_pos() - offset;
-  }
-
-  inline  char*  restore(std::size_t offset) noexcept {
-          auto   l_unwind = get_length(offset);
-          if(l_unwind) {
-              base_type::raw_unget(l_unwind);
+  inline  char*  get(std::size_t length) noexcept {
+          char*  p_raw = acquire(length);
+          if(p_raw != nullptr) {
+              commit();
           }
-          return base_type::at(offset);
+          return p_raw;
   }
 
-  inline  bool   reserve(std::size_t count) noexcept {
-          return base_type::reserve(count);
+  inline  char*  copy(const char* copy, std::size_t length) noexcept {
+          char*  p_raw = acquire(length, copy);
+          if(p_raw != nullptr) {
+              commit();
+          }
+          return p_raw;
+  }
+
+  inline  char*  copy(const char* copy) noexcept {
+          char*  p_raw = acquire(copy);
+          if(p_raw != nullptr) {
+              commit();
+          }
+          return p_raw;
+  }
+
+  inline  void   restore(const char*& position) noexcept {
+          if((position != nullptr) &&
+              ((position >= m_base) && (position <= m_last))) {
+              m_used = position;
+              position = nullptr;
+          }
+  }
+
+  inline  bool   reserve(std::size_t size) noexcept {
+          void*  p_alloc = m_resource.allocate(size, alignof(max_align_t));
+          if(p_alloc != nullptr) {
+              m_base = reinterpret_cast<char*>(p_alloc);
+              if(m_base != nullptr) {
+                  m_used = m_base;
+                  m_next = m_base;
+                  m_last = m_base + size;
+                  m_size = size;
+                  return true;
+              }
+          }
+          return false;
   }
 
           pool& operator=(const pool&) noexcept = delete;

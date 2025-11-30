@@ -173,6 +173,16 @@ class flat_list: public std::vector<Xt>
           }
   }
 
+  inline  node_type& operator[](ssize_t index) noexcept {
+          if(index > 0) {
+              return base_type::operator[](index);
+          } else
+          if(index < 0) {
+              return base_type::operator[](static_cast<ssize_t>(base_type::size() + index));
+          } else
+              return base_type::front();
+  }
+
   inline  flat_list& operator=(const flat_list& rhs) noexcept {
           base_type::operator=(rhs);
           return *this;

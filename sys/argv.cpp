@@ -1,4 +1,4 @@
-/** 
+/**
     Copyright (c) 2021, wicked systems
     All rights reserved.
 
@@ -6,16 +6,16 @@
     conditions are met:
     * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
       disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following 
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided with the distribution.
     * Neither the name of wicked systems nor the names of its contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
     INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
     SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
     CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **/
@@ -89,7 +89,7 @@ bool  argv::arg_reserve(int count, int keep) noexcept
       int l_far_count = count - arg_near_reserve;   // how many 'far' instances to reserve memory for
       int l_far_move  = keep;                       // how many of the existing args to preserve into the new array
       if(l_far_count > m_far_reserve) {
-          int   l_far_reserve = get_round_value(l_far_count, global::cache_small_max);
+          int   l_far_reserve = get_round_value(l_far_count, static_cast<int>(global::cache_small_max));
           arg*  l_far_ptr     = reinterpret_cast<arg*>(malloc(l_far_reserve * sizeof(arg)));
           if(l_far_ptr != nullptr) {
               int i_far_arg = 0;
@@ -164,7 +164,7 @@ void  argv::assign(const argv& copy) noexcept
           if(copy.get_count() > 0) {
               bool l_reserve_success = arg_reserve(copy.m_arg_count, 0);
               if(l_reserve_success) {
-                  for(int 
+                  for(int
                         i_arg = 0;
                         (i_arg < copy.get_count()) && (i_arg < arg_near_reserve);
                         i_arg++) {
@@ -175,7 +175,7 @@ void  argv::assign(const argv& copy) noexcept
                         i_arg < copy.get_count();
                         i_arg++) {
                         m_arg_far[i_arg - arg_near_reserve] = copy.get_arg(i_arg);
-                          
+
                   }
                   m_arg_count = copy.m_arg_count;
               }
@@ -189,7 +189,7 @@ void  argv::assign(argv&& copy) noexcept
           dispose();
           clear();
           if(copy.get_count() > 0) {
-              for(int 
+              for(int
                     i_arg = 0;
                     (i_arg < copy.m_arg_count) && (i_arg < arg_near_reserve);
                     i_arg++) {
@@ -283,7 +283,7 @@ int   argv::load(char** argv, int argc) noexcept
           (argc < arg_count_max)) {
           bool l_reserve_success = arg_reserve(argc, 0);
           if(l_reserve_success) {
-              for(int 
+              for(int
                     i_arg = 0;
                     (i_arg < argc) && (i_arg < arg_near_reserve);
                     i_arg++) {
@@ -294,7 +294,7 @@ int   argv::load(char** argv, int argc) noexcept
                     i_arg < argc;
                     i_arg++) {
                     m_arg_far[i_arg - arg_near_reserve] = arg(argv[i_arg]);
-                      
+
               }
               m_arg_count = argc;
           }

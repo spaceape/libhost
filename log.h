@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <cstdarg>
 
+void  vprintlog(const char*, const char*, int, va_list) noexcept;
 void  printlog(const char*, const char*, int, ...) noexcept;
 void  printdbg(const char*, const char*, int, ...) noexcept;
 void  printdbgi(const char*, const char*, int, ...) noexcept;
